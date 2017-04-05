@@ -29,11 +29,15 @@ def applyKey(key, text, m=26):
     keyLen = len(key)
     txtLen = len(text)
     chunkSize = min(keyLen, txtLen)
-    maxLen = max(keyLen, txtLen)
-    return ''.join(
-        rotChar(aZero(key[i]), m, text[i])
-        for start in range(0,maxLen,chunkSize)
-         for i in range(start,min(start+chunkSize,maxLen)))
+
+    transformedText = ''
+
+    chunks = [text[i:i+chunkSize] for i in range(0, len(text), chunkSize)]
+    for chunk in chunks:
+        for i in range (0, min(chunkSize, len(chunk))):
+            transformedText += rotChar(aZero(key[i]), m, chunk[i])
+
+    return transformedText
 
 if __name__ == '__main__':
     if (aZero('c') != 2):

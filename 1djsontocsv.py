@@ -1,6 +1,11 @@
 import json
 import csv
 
+"""
+Converts a simple JSON array to a CSV file
+Assumes that all the JSON objects in the array have the same structure
+"""
+
 def csvify(json_file_name, csv_file_name):
     with open(json_file_name) as jsonfile:
         with open(csv_file_name, 'w+') as csvfile:

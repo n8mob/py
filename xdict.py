@@ -1,6 +1,8 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python
+
 
 import xml.etree.ElementTree as ET
+
 
 def etree_to_dict(t):
     d = {c.tag: etree_to_dict(c) for c in t.getchildren()}

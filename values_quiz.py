@@ -24,6 +24,7 @@ for value in my_values:
 
 if __name__ == '__main__':
     keep_going = input("Shall we? ")
+    print("('Q' to quit)")
 
     while keep_going:
         pair = random.choice(my_values), random.choice(my_values)
@@ -39,7 +40,6 @@ if __name__ == '__main__':
             choice = pair[choice_number]
             my_value_counts[choice] += 1
             nth = num2words(my_value_counts[choice], to='ordinal')
-            print(f'You have chosen {choice} for the {nth} time.')
 
     for value, count in my_value_counts.items():
         print(f'{value}: {count} time{"" if count == 1 else "s"}')

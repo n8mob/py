@@ -41,4 +41,5 @@ if __name__ == '__main__':
             nth = num2words(my_value_counts[choice], to='ordinal')
             print(f'You have chosen {choice} for the {nth} time.')
 
-    print(my_value_counts)
+    for value, count in my_value_counts.items():
+        print(f'{value}: {count} time{"" if count == 1 else "s"}')

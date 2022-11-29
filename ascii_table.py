@@ -4,7 +4,7 @@ def encode(phrase: str):
 
     for letter in phrase:
         numeric_letter = ord(letter)
-        print(f'{letter}: hex: {numeric_letter:x} bin: {numeric_letter:08b}')
+        print(f'{letter}: dec: {numeric_letter} hex: {numeric_letter:x} subd: {numeric_letter-64} bin: {numeric_letter:08b}')
 
 
 def make_ascii_table():

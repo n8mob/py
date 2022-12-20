@@ -7,7 +7,8 @@ import sys
 from datetime import datetime as dt
 import shutil
 
-ORG_DAY_HEADER_FORMAT = "* %a, %b %-d"
+ALWAYS_PRINT_MONTH = "* %a, %b %-d"
+DAY_OF_WEEK_HEADER = "* %A %-d"
 ORG_FILE_NAME_FORMAT = '%m_%d.org'
 
 c = calendar.Calendar(firstweekday=calendar.SUNDAY)
@@ -19,9 +20,9 @@ def weeks_and_files_for_month(year, month):
     return [(week, dt.strftime(week[0], ORG_FILE_NAME_FORMAT)) for week in weeks]
 
 
-def headers_for_days_of_week(week):
+def headers_for_days_of_week(week, always_print_month=False):
     for day in week:
-        yield dt.strftime(day, ORG_DAY_HEADER_FORMAT)
+        yield dt.strftime(day, ALWAYS_PRINT_MONTH if always_print_month else DAY_OF_WEEK_HEADER)
 
 
 def prepare_month(year: int, month: int):
@@ -30,26 +31,42 @@ def prepare_month(year: int, month: int):
 
         if not week_is_from_last_month:
             week_filename = dt.strftime(week[0], ORG_FILE_NAME_FORMAT)
-            print(f'{week_filename} includes {", ".join(headers_for_days_of_week(week))}')
+            print(f'{week_filename} includes {", ".join(headers_for_days_of_week(week, always_print_month=True))}')
 
 
 if __name__ == '__main__':
+    today = dt.now().date()
     options = argparse.ArgumentParser()
-    options.parse_args()
+    options.add_argument('-y', '--year', type=int, default=today.year)
+    options.add_argument('-m', '--month', type=int, default=today.month)
+    options.add_argument("--next-week", action='store_true')
+    options.add_argument("--always-print-month", action='store_true')
+    args = options.parse_args()
 
-    if sys.argv and len(sys.argv) > 1:
-        main_year = int(sys.argv[1])
+    main_year = args.year or today.year
+    main_month = args.month or today.month
+
+    if args.next_week:
+        month_for_next_week = (today + datetime.timedelta(days=7)).month
+        next_weeks_month = c.monthdatescalendar(today.year, today.month)
+        next_week = None
+
+        for main_week in next_weeks_month:
+            if main_week[0] > today:
+                next_week = main_week
+                break
+
+        if not next_week:
+            print('there was a problem figuring out when next week starts')
+            exit(1)
+
+        for header in headers_for_days_of_week(next_week):
+            print(header)
+
     else:
-        main_year = datetime.date.today().year
-
-    main_month = 11
-
-    month_name = calendar.month_name[main_month]
-    print(f'Preparing files for the weeks in {month_name} {main_year}')
-
-    weeks_for_month = weeks_and_files_for_month(main_year, main_month)
-    for main_week, week_file_name in weeks_for_month:
-        with open(week_file_name, 'w') as week_file:
-            print(f'opened {week_file_name} in {week_file}')
-            for header in headers_for_days_of_week(main_week):
-                week_file.write(header + '\n\n')
+        weeks_for_month = weeks_and_files_for_month(main_year, main_month)
+        for main_week, week_file_name in weeks_for_month:
+            with open(week_file_name, 'w') as week_file:
+                print(f'opened {week_file_name} in {week_file}')
+                for header in headers_for_days_of_week(main_week):
+                    week_file.write(header + '\n\n')

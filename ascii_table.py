@@ -13,3 +13,4 @@ def make_ascii_table():
 
 if __name__ == '__main__':
     encode('UPSTAIRS BOOKSHELF')
+    

@@ -1,17 +1,26 @@
+import fractions
 prompt = 'n: '
-s = input(prompt)
-debug = False
 
-if s.lower().startswith('debug'):
-  debug = True
-  print('debug mode')
+
+def main():
   s = input(prompt)
+  debug = False
+  if s.lower().startswith('debug'):
+    debug = True
+    print('debug mode')
+    s = input(prompt)
+  while not s.lower().startswith('quit'):
+    n = float(s)
+    if debug:
+      print(f's: {s}\tn: {n}')
 
-while not s.lower().startswith('quit'):
-  n = float(s)
-  if debug:
-    print(f's: {s}\tn: {n}')
-  print(float.as_integer_ratio(n))
-  s = input(prompt)
+    fraction = fractions.Fraction.from_float(n).limit_denominator(9999)
+    print(fraction)
 
-print('goodbye')
+    s = input(prompt)
+
+  print('goodbye')
+
+
+if __name__ == '__main__':
+    main()

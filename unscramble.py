@@ -1,6 +1,5 @@
 import random
 import datetime as dt
-from old_rot import rot, bruteRot
 
 def is_good(can, found_sofar):
   return (

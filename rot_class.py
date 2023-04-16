@@ -2,12 +2,13 @@ import string
 from unittest import TestCase
 
 
-# noinspection PyMethodMayBeStatic
 class Rot:
-    def aZero(self, c):
+    @staticmethod
+    def aZero(c):
         return ord(c.upper()) - ord('A')
 
-    def zeroA(self, n):
+    @staticmethod
+    def zeroA(n):
         return chr(n + ord('A'))
 
     def stringFromInts(self, l, n=0):
@@ -20,7 +21,8 @@ class Rot:
         num = (self.aZero(c) + n) % m
         return self.zeroA(num)
 
-    def rotInts(self, n, m, l):
+    @staticmethod
+    def rotInts(n, m, l):
         return [(i + n) % m for i in l]
 
     def rot(self, n, m, st):
@@ -44,45 +46,63 @@ class Rot:
         return transformedText
 
 
-class TestRot(TestCase):
+class TestAZero(TestCase):
     def setUp(self):
         self.unit_under_test = Rot()
 
+    def test_cIs2(self):
+        self.assertEqual(2, self.unit_under_test.aZero('c'))
 
-    def test_cIs3(self):
-        self.assertEqual(3, self.unit_under_test.aZero('c'))
+    def test_zIs25(self):
+        self.assertEqual(25, self.unit_under_test.aZero('z'))
+
+    def test_yIs24(self):
+        self.assertEqual(24, self.unit_under_test.aZero('y'))
 
 
-    def all_the_tests(self):
-        if (aZero('c') != 2):
-            print('expected aZero(\'c\') => 3 but it was ' + str(aZero('c')))
-        if (aZero('z') != 25):
-            print('expected aZero(z) => 26, but it was ' + str(aZero('z')))
-        if (aZero('y') != 24):
-            print('expected aZero(y) => 25, but it was ' + str(aZero('y')))
-        if (zeroA(4) != 'E'):
-            print('expected zeroA(4) => E, but it was ' + zeroA(4))
-        if (zeroA(25) != 'Z'):
-            print('expected zeroA(25) => Z, but it was ' + zeroA(26))
-        if ((zeroA(aZero('z')) != 'Z')):
-            print('expected zeroA(aZero(\'z\')) => Z, but it was ' + zeroA(aZero('z')))
-        if (intsFromString('az') != [0, 25]):
-            print('expected intsFromString(\'az\') => [0,25], but it was ' + intsFromString('az'))
-        if (rotChar(13, 26, 'a') != 'N'):
-            print('expected rotChar(13,26,\'a\') => \'N\', but it was ' + rotChar(13, 26, 'a'))
-        if (rotChar(13, 26, 'n') != 'A'):
-            print('expected rotChar(13,26,\'n\') => \'A\', but it was ' + rotChar(13, 26, 'n'))
-        if (rotChar(1, 26, 'y') != 'Z'):
-            print('expected rot(1, 26, \'y\') => Z, but it was ' + rotChar(1, 26, 'y'))
-        if (rot(1, 26, string.ascii_lowercase) != 'BCDEFGHIJKLMNOPQRSTUVWXYZA'):
-            print('expecting rot(1,26,ascii_lowercase) => \'BCDEFGHIJKLMNOPQRSTUVWXYZA\', ' +
-                  'but it was ' + rot(1, 26, string.ascii_lowercase))
-        if (rot(13, 26, string.ascii_lowercase) != 'NOPQRSTUVWXYZABCDEFGHIJKLM'):
-            print('expecting rot(13,26,ascii_lowercase) => \'NOPQRSTUVWXYZABCDEFGHIJKLM\', ' +
-                  'but it was ' + rot(13, 26, string.ascii_lowercase))
-        if (applyKey('bbb', 'abc') != 'BCD'):
-            print('expecting \'BCD\', but instead it was ' + applyKey('bbb', 'abc'))
-        if (applyKey('b', 'ab') != 'BC'):
-            print('expecting \'BC\' but instead it was ' + applyKey('b', 'ab'))
-        if (applyKey('bc', 'bb') != 'CD'):
-            print('expecting \'CD\' but instead it was ' + applyKey('bc', 'aa'))
+class TestZeroA(TestCase):
+    def setUp(self) -> None:
+        self.unit_under_test = Rot()
+
+    def test_4IsE(self):
+        self.assertEqual('E', self.unit_under_test.zeroA(4))
+
+    def test_25IsZ(self):
+        self.assertEqual('Z', self.unit_under_test.zeroA(25))
+
+    def test_CaseInsensitiveRoundTrip(self):
+        self.assertEqual('Z', self.unit_under_test.zeroA(self.unit_under_test.aZero('z')))
+
+
+class TestRestOfRot(TestCase):
+    def setUp(self) -> None:
+        self.unit_under_test = Rot()
+
+    def test_azInts(self):
+        self.assertEqual([0, 25], self.unit_under_test.intsFromString('az'))
+
+    def test_rotAby13(self):
+        self.assertEqual('N', self.unit_under_test.rotChar(13, 26, 'a'))
+
+    def test_rotNby13(self):
+        self.assertEqual('A', self.unit_under_test.rotChar(13, 26, 'n'))
+
+    def test_rotYby1(self):
+        self.assertEqual('Z', self.unit_under_test.rotChar(1, 26, 'y'))
+
+    def test_rotAlphabetBy1(self):
+        rot1alphabet = 'BCDEFGHIJKLMNOPQRSTUVWXYZA'
+        self.assertEqual(rot1alphabet, self.unit_under_test.rot(1, 26, string.ascii_lowercase))
+
+    def test_rotAlphabetBy13(self):
+        rot13alphabet = 'NOPQRSTUVWXYZABCDEFGHIJKLM'
+        self.assertEqual(rot13alphabet, self.unit_under_test.rot(13, 26, string.ascii_lowercase))
+
+    def test_applyKeyBBB(self):
+        self.assertEqual('BCD', self.unit_under_test.applyKey('bbb', 'abc'))
+
+    def test_applyKeyB(self):
+        self.assertEqual('BC', self.unit_under_test.applyKey('b', 'ab'))
+
+    def test_applyKeyBC(self):
+        self.assertEqual('CD', self.unit_under_test.applyKey('bc', 'bb'))

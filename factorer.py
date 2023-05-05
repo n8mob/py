@@ -1,4 +1,5 @@
 import math
+import os
 from unittest import TestCase
 
 
@@ -6,35 +7,26 @@ class Factorer:
     """Finding Prime Factorizations
 
     """
+
     def __init__(self, n):
         self.n = n
-        n_range = range(1, n+1)
+        n_range = range(2, n + 1)
 
         self.factors = {n: {} for n in n_range}
         self.primes = [2, 3]
         self.max_factor = {m: math.ceil(math.sqrt(m)) for m in self.factors.keys()}
-        self.index_of_max_prime_factor = {m: -1 for m in self.factors.keys()}
-
-        for i_p in range(len(self.primes)):
-            for i_n in range(len(self.max_factor)):
-                if self.primes[i_p] <= self.max_factor[i_n]:
-                    self.index_of_max_prime_factor[i_n] = i_p
-                else:
-                    self.index_of_max_prime_factor[i_n] = -1
 
     def compute_factors(self):
         for m, factors in self.factors.items():
             remainder = m
 
-            for index_of_prime in range(0, self.index_of_max_prime_factor[m]):
-                prime_factor = self.primes[index_of_prime]
-                if remainder % prime_factor == 0:
-                    factors[prime_factor] = factors[prime_factor] + 1 if prime_factor in factors else 1
-                    remainder = remainder // prime_factor
-            if remainder == 0:  # factoring complete
-                if not factors:  # new prime?
-                    self.primes.append(m)
-                    break
+            for p in self.primes:
+                while remainder % p == 0:
+                    factors[p] = factors[p] + 1 if p in factors else 1
+                    remainder = remainder // p
+            if not Factorer.check_factorization(m, factors):  # new prime?
+                self.primes.append(m)
+                factors[m] = 1
 
     def index_of_max_prime_factor(self, m):
         for i, p in enumerate(self.primes):
@@ -96,21 +88,16 @@ class TestInit(TestCase):
         f = Factorer(2)
         self.assertEqual(2, f.n)
         self.assertIsNotNone(f.factors)
-        self.assertEqual(2, len(f.factors))
-        self.assertIn(1, f.factors)
+        self.assertEqual(1, len(f.factors))
         self.assertIn(2, f.factors)
 
     def test_init_max_factors_with_2(self):
         f = Factorer(2)
-        self.assertEqual([1, 2], f.max_factor)
+        self.assertEqual({2: 2}, f.max_factor)
 
     def test_init_max_factors_with_14(self):
         f = Factorer(14)
-        self.assertEqual([1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4], f.max_factor)
-
-    def test_init_empty_prime_indices(self):
-        f = Factorer(14)
-        self.assertEqual(14, len(f.index_of_max_prime_factor))
+        self.assertEqual([2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4], list(f.max_factor.values()))
 
 
 class TestCompute(TestCase):
@@ -119,8 +106,108 @@ class TestCompute(TestCase):
 
         f.compute_factors()
 
-        self.assertEqual([1, 2, 3], list(f.factors.keys()))
+        self.assertIn(2, f.factors)
+        self.assertIn(3, f.factors)
 
-        for n, factors in f.factors.items():
-            self.assertIsNotNone(factors, f"{n}: factors should be a dictionary")
-            self.assertGreater(0, len(factors), f"{n}: factors should not be empty")
+        self.assertEqual({2: 1}, f.factors[2])
+        self.assertEqual({3: 1}, f.factors[3])
+
+        for m, factors in f.factors.items():
+            self.assertIsNotNone(factors, f"{m}: factors should be a dictionary")
+            self.assertGreater(len(factors), 0, f"{m}: factors should not be empty")
+
+            self.assertTrue(f.check_factorization(m, factors))
+
+    def test_compute_4(self):
+        f = Factorer(4)
+
+        expected_factors = {2: {2: 1},
+                            3: {3: 1},
+                            4: {2: 2}}
+
+        f.compute_factors()
+
+        self.assertEqual(expected_factors, f.factors)
+
+        for m, factors in f.factors.items():
+            self.assertTrue(f.check_factorization(m, factors))
+
+    def test_5_detected_as_new_prime(self):
+        f = Factorer(5)
+
+        expected_factors = {2: {2: 1},
+                            3: {3: 1},
+                            4: {2: 2},
+                            5: {5: 1}}
+
+        f.compute_factors()
+
+        self.assertEqual(expected_factors, f.factors)
+
+    def test_6_has_two_factors(self):
+        f = Factorer(6)
+        f.compute_factors()
+
+        self.assertEqual({2: 1, 3: 1}, f.factors[6])
+
+    def test_12_factors_include_a_square(self):
+        f = Factorer(12)
+        f.compute_factors()
+
+        expected = {2: {2: 1},
+                    3: {3: 1},
+                    4: {2: 2},
+                    5: {5: 1},
+                    6: {2: 1, 3: 1},
+                    7: {7: 1},
+                    8: {2: 3},
+                    9: {3: 2},
+                    10: {2: 1, 5: 1},
+                    11: {11: 1},
+                    12: {2: 2, 3: 1}}
+
+        self.assertEqual(expected, f.factors)
+
+    def test_up_to_20(self):
+        f = Factorer(20)
+        f.compute_factors()
+
+        expected = {2: {2: 1},
+                    3: {3: 1},
+                    4: {2: 2},
+                    5: {5: 1},
+                    6: {2: 1, 3: 1},
+                    7: {7: 1},
+                    8: {2: 3},
+                    9: {3: 2},
+                    10: {2: 1, 5: 1},
+                    11: {11: 1},
+                    12: {2: 2, 3: 1},
+                    13: {13: 1},
+                    14: {2: 1, 7: 1},
+                    15: {3: 1, 5: 1},
+                    16: {2: 4},
+                    17: {17: 1},
+                    18: {2: 1, 3: 2},
+                    19: {19: 1},
+                    20: {2: 2, 5: 1}
+                    }
+
+        self.assertEqual(expected, f.factors)
+
+    def test_up_to_100(self):
+        f = Factorer(100)
+        f.compute_factors()
+
+        for m, factors in f.factors.items():
+            self.assertTrue(Factorer.check_factorization(m, factors))
+
+    def test_up_to_392(self):
+        f = Factorer(390)
+        f.compute_factors()
+
+        with open(os.path.expanduser('~/n/projects/PrimeFactorization.org')) as pf:
+            file_lines = [[b.trim(), c.trim()] for line in pf.read().splitlines()[4:395] for a, b, c, d in line.split('|')]
+
+        last_line = file_lines[-1]
+        self.assertEqual(['392', '2^3*7^2'], last_line)

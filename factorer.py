@@ -1,5 +1,6 @@
 import math
 import os
+from datetime import datetime
 from unittest import TestCase
 
 
@@ -40,6 +41,18 @@ class Factorer:
     @staticmethod
     def calculate(factors: {int: int}):
         return math.prod([f ** e for f, e in factors.items()])
+
+    @staticmethod
+    def print_factor_line(m: int, factors: {int: {int: int}}) -> str:
+        expression = ''
+        for factor, power in factors.items():
+            if expression != '':
+                expression += '*'
+            expression += str(factor)
+            if power > 1:
+                expression += f'^{power}'
+        fs = f'| {m:>3} | {expression:<9} |'
+        return fs
 
 
 class TestHelperFunctions(TestCase):
@@ -98,7 +111,6 @@ class TestInit(TestCase):
     def test_init_max_factors_with_14(self):
         f = Factorer(14)
         self.assertEqual([2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4], list(f.max_factor.values()))
-
 
 class TestCompute(TestCase):
     def test_compute_3(self):
@@ -214,19 +226,21 @@ class TestCompute(TestCase):
         errors = []
 
         for m, factors in f.factors.items():
-            expression = ''
-
-            for factor, power in factors.items():
-                if expression != '':
-                    expression += '*'
-                expression += str(factor)
-                if power > 1:
-                    expression+= f'^{power}'
-
-            fs = f'| {m:>3} | {expression:<9} |'
+            fs = Factorer.print_factor_line(factors, m)
             if fs != file_lines[line_num]:
                 errors.append(m)
             line_num += 1
 
         self.assertFalse(errors, f'\nCheck factorization of: {errors}')
 
+
+if __name__ == '__main__':
+    main_factorer = Factorer(392)
+    main_factorer.compute_factors()
+
+    lines = []
+    for n, n_factors in main_factorer.factors.items():
+        lines.append(Factorer.print_factor_line(n, n_factors) + '\n')
+
+    with open(f'/tmp/{datetime.now()}.org', 'w') as tempfile:
+        tempfile.writelines(lines)

@@ -206,8 +206,27 @@ class TestCompute(TestCase):
         f = Factorer(390)
         f.compute_factors()
 
-        with open(os.path.expanduser('~/n/projects/PrimeFactorization.org')) as pf:
-            file_lines = [[b.trim(), c.trim()] for line in pf.read().splitlines()[4:395] for a, b, c, d in line.split('|')]
+        with open(os.path.expanduser('~/Documents/n/projects/PrimeFactorization.org')) as pf:
+            file_lines = pf.read().splitlines()[4:395]
 
-        last_line = file_lines[-1]
-        self.assertEqual(['392', '2^3*7^2'], last_line)
+        line_num = 0
+
+        errors = []
+
+        for m, factors in f.factors.items():
+            expression = ''
+
+            for factor, power in factors.items():
+                if expression != '':
+                    expression += '*'
+                expression += str(factor)
+                if power > 1:
+                    expression+= f'^{power}'
+
+            fs = f'| {m:>3} | {expression:<9} |'
+            if fs != file_lines[line_num]:
+                errors.append(m)
+            line_num += 1
+
+        self.assertFalse(errors, f'\nCheck factorization of: {errors}')
+

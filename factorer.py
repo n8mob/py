@@ -1,5 +1,9 @@
+import contextlib
 import math
 import os
+import sys
+import tempfile
+from argparse import ArgumentParser, FileType
 from datetime import datetime
 from unittest import TestCase
 
@@ -51,7 +55,7 @@ class Factorer:
             expression += str(factor)
             if power > 1:
                 expression += f'^{power}'
-        fs = f'| {m:>3} | {expression:<9} |'
+        fs = f'| {m:>3} | {expression:<10} |'
         return fs
 
 
@@ -235,12 +239,14 @@ class TestCompute(TestCase):
 
 
 if __name__ == '__main__':
-    main_factorer = Factorer(392)
+    ap = ArgumentParser()
+    ap.add_argument('n', type=int)
+    ap.add_argument('--outfile', '-o', type=FileType('w'))
+
+    args = ap.parse_args()
+
+    main_factorer = Factorer(args.n)
     main_factorer.compute_factors()
 
-    lines = []
     for n, n_factors in main_factorer.factors.items():
-        lines.append(Factorer.print_factor_line(n, n_factors) + '\n')
-
-    with open(f'/tmp/{datetime.now()}.org', 'w') as tempfile:
-        tempfile.writelines(lines)
+        print(Factorer.print_factor_line(n, n_factors), file=args.outfile if args.outfile else sys.stdout)

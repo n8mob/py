@@ -91,17 +91,17 @@ if __name__ == '__main__':
     start_time = datetime.now()
     elapsed_seconds = 0
 
-    while True:
+    while len(a2.current_correct()) < 8:
         previous_match = len(a2.current_correct())
-        increments_before_report = 1
+        increments_before_report = 200
         while len(a2.current_correct()) <= previous_match:
             for i in range(increments_before_report):
                 a2.increment()
 
             elapsed_seconds = (datetime.now() - start_time).total_seconds()
 
-            print(f'\r{a2.i:<20,} iterations to {a2.current_correct()} ({elapsed_seconds} seconds)', end='', flush=True)
+            print(f'\r{a2.i:<8,} iterations to {a2.current_correct()} ({elapsed_seconds} seconds)', end='', flush=True)
 
         print(f'\r', end='')
-        print(f'{a2.i:<20,} iterations to {a2.current_correct()} ({elapsed_seconds} seconds)', flush=True)
+        print(f'{a2.i:<8,} iterations to {a2.current_correct()} ({elapsed_seconds} seconds)', flush=True)
         increments_before_report *= 100

@@ -1,3 +1,5 @@
+import sys
+
 import requests
 
 
@@ -38,20 +40,19 @@ if __name__ == '__main__':
     category_menu = CategoryMenu(response.json()[0])
     chosen_category = choose_from_dict(category_menu.categories_by_name, 'which category?')
 
-    level_display_names = ['\n'.join(level['levelName']) for level in chosen_category]
-    level_index = choose_from_list(level_display_names, 'which level?')
+    for level in chosen_category:
+        for puzzle in level['puzzles']:
+            print()
+            CategoryMenu.print(puzzle['clue'])
+            print()
+            CategoryMenu.print(puzzle['init'])
 
-    chosen_level = chosen_category[level_index]
+            guessChar = sys.stdin.read(1)
 
-    for puzzle in chosen_level['puzzles']:
-        print()
-        CategoryMenu.print(puzzle['clue'])
+            for i, winChar in enumerate(puzzle['winText']):
+                while guessChar != winChar:
+                    guessChar = sys.stdin.read(1)
+                print(f'\r{puzzle["winText"][:i+1]}', end='')
+                guessChar = ''
 
-        guess = input('\n')
-
-        while guess != puzzle['winText']:
-            print('INCORRECT')
-            print('TRY AGAIN')
-            guess = input()
-
-        print('CORRECT\n')
+            print('\nCORRECT')

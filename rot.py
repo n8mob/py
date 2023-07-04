@@ -45,6 +45,16 @@ class Rot:
 
         return transformedText
 
+    def interactive_brute_rot(self, st):
+        for i in range(26, 0, -1):
+            candidate = self.rot(i, 26, st)
+            is_solution = input(candidate + ' ? y/N')
+            if is_solution.lower() in ['', 'n']:
+                continue
+            else:
+                print(f'\n{st} rotated by {i} is {candidate}\n')
+                break
+
 
 class TestAZero(TestCase):
     def setUp(self):

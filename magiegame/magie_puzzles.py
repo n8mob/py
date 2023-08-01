@@ -4,17 +4,15 @@ import time
 
 import requests
 
-class CategoryMenu:
-    def __init__(self, menu):
-        self.categories_by_name = {}
+from MagieModel import Menu
 
-        for name, category in menu['categories'].items():
-            self.categories_by_name[name] = category['levels']
 
-    @staticmethod
-    def print(lines):
-        for line in lines:
-            print(line)
+def print_menu(scr: curses.window, json_path):
+    with open(json_path) as menu_file:
+        full_menu = Menu(scr, file=menu_file)
+
+    full_menu.print_menu_choice()
+    scr.getch()
 
 
 def choose_from_dict(choices, prompt):
@@ -27,6 +25,7 @@ def choose_from_dict(choices, prompt):
     else:
         return choices[choice]
 
+
 def choose_from_list(choices, prompt):
     for i, choice_name in enumerate(choices):
         print(f'\n{i}: {choice_name}')
@@ -35,7 +34,7 @@ def choose_from_list(choices, prompt):
     return int(choice)
 
 
-def try_a_puzzle():
+def try_a_puzzle(scr: curses.window):
     url = 'https://puzzles.magiegame.com/menus/'
     response = requests.get(url)
     category_menu = CategoryMenu(response.json()[0])
@@ -47,14 +46,14 @@ def try_a_puzzle():
             print()
             CategoryMenu.print(puzzle['init'])
 
-            guessPhrase = None
-            guessChar = None
+            guess_phrase = None
+            guess_char = None
             win_index = 0
-            winChar = puzzle['winText'][win_index]
+            win_char = puzzle['winText'][win_index]
 
-            while guessPhrase != puzzle['winText']:
-                guessChar = getch()
-                if guessChar == winChar:
+            while guess_phrase != puzzle['winText']:
+                guess_char = scr.getch()
+                if guess_char == win_char:
                     print(puzzle['winText'][:win_index])
                 else:
                     print('\b')
@@ -99,5 +98,6 @@ def guess_loop(scr: curses.window):
         scr.addstr(2, 2, 'CORRECT', color)
         scr.refresh()
 
+
 if __name__ == '__main__':
-    curses.wrapper(guess_loop)
+    curses.wrapper(print_menu, 'TestMenus/FullMenu.json')

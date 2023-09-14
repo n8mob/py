@@ -1,12 +1,21 @@
 punctuation = '.,'
 etaoin_shrdlu = 'etaoinshrdlucmfwypvbgkjqxz'
-guess_1 = 'teaoinshrdlucmfwypvbgkjqxz'
-guess_2 = 'etaoinshrdlucmfwypvbgkjqxz'
-guess_3 = 'aetoinshrdlucmfwypvbgkjqxz'
-guess_4 = 'oetainshrdlucmfwypvbgkjqxz'
-vowels_first = 'eaioutnshrdlcmfwypvbgkjqxz'
-modified = {
-    'stdoainrelcgmuywpvbfkjqxz': 'duringywredytrlywlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilawuedosndtndrsasiksmsootgsofuiabeptndosarslep',
+
+# noinspection SpellCheckingInspection
+key_guesses = {
+    'teaoinshrdlucmfwypvbgkjqxz': '',
+    'etaoinshrdlucmfwypvbgkjqxz': '',
+    'aetoinshrdlucmfwypvbgkjqxz': '',
+    'oetainshrdlucmfwypvbgkjqxz': '',
+    'eaioutnshrdlcmfwypvbgkjqxz': '',
+    'stdoainrelcgmuywpvbfkjqxz':
+        'duringywredytrlywlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilawuedosndtndrsasiksmsootgsofuiabeptndosarslep',
+    'stdoainrelcgmuypwvbfkjqxz':
+        'duringypredytrlyplcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilapuedosndtndrsasiksmsootgsofuiabewtndosarslew',
+    'stdoainrelcgmupywvbfkjqxz':
+        'duringpyredptrlpylcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilayuedosndtndrsasiksmsootgsofuiabewtndosarslew',
+    'stdoainrelcgmuywvpbfkjqxz':
+        '',
 }
 
 
@@ -74,7 +83,7 @@ def brute_1(with_punct, by_frequency):
         try_guess(new_guess, with_punct, by_frequency)
 
 
-def try_guess(guess, with_punct, by_frequency):
+def try_guess(guess, cypher_text, by_frequency):
     frequency_guess = guess.copy()
     key_guess = {}
     for cc, frequency in by_frequency:
@@ -82,7 +91,7 @@ def try_guess(guess, with_punct, by_frequency):
 
     print(key_guess)
     attempted_solution = ''
-    for cc in with_punct:
+    for cc in cypher_text:
         if cc in key_guess:
             attempted_solution += key_guess[cc]
         else:
@@ -90,12 +99,17 @@ def try_guess(guess, with_punct, by_frequency):
     print(attempted_solution)
 
 
-def enter_key(raw_cypher, by_frequency):
+def key_interactive(raw_cypher, by_frequency):
     while True:
         key_guess = input('key guess: ')
         try_guess(list(key_guess), raw_cypher, by_frequency)
 
 
+def rotate_key(key, cypher_text, by_frequency):
+
+
+
+
 if __name__ == '__main__':
     _raw_cypher, _most_frequent = count_original()
-    enter_key(_raw_cypher, _most_frequent)
+    rotate_key(etaoin_shrdlu, _raw_cypher, _most_frequent)

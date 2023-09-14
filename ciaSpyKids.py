@@ -5,7 +5,9 @@ guess_2 = 'etaoinshrdlucmfwypvbgkjqxz'
 guess_3 = 'aetoinshrdlucmfwypvbgkjqxz'
 guess_4 = 'oetainshrdlucmfwypvbgkjqxz'
 vowels_first = 'eaioutnshrdlcmfwypvbgkjqxz'
-modified = 'stdoanirelcmguywpvbfkjqxz'
+modified = {
+    'stdoainrelcgmuywpvbfkjqxz': 'duringywredytrlywlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilawuedosndtndrsasiksmsootgsofuiabeptndosarslep',
+}
 
 
 def count_original():
@@ -32,36 +34,38 @@ def count_original():
 5  3  9  14  18  19  1
 13  6  15
 22  11  14  4  11  23  19  1"""
-    de_spaced = original_cyphertext.split()
-    with_punct = []
-    without_punct = []
-    # assuming all punctuation follows a number
-    for element in de_spaced:
-        """assumptions:
-         1. all punctuations follow the number
-         2. each element contains at most 1 punctuation symbol"""
-        if '.' in element or ',' in element:
-            punct = '.' if '.' in element else ','
-            index_of_punctuation = element.index(punct)
-            without_punct.append(element[:index_of_punctuation])
-            with_punct.append(element[:index_of_punctuation])
-            with_punct.append(element[index_of_punctuation:])
-        else:
-            with_punct.append(element)
-            without_punct.append(element)
-    counts = {}
-    for cc in without_punct:
-        if cc in counts:
-            counts[cc] += 1
-        else:
-            counts[cc] = 1
+    lines = original_cyphertext.split('\n')
+    lines_with_punctuation = {'.': [], ',': []}
+    for line_number, line in enumerate(lines):
+        line = line.replace(' \t', ' ')
+        line = line.replace('  ', ' ')
+        line = line.replace('\n', '')
+
+        for punct in lines_with_punctuation:
+            if punct in line:
+                lines_with_punctuation[punct].append(line_number)
+                line = line.replace(punct, '')
+        lines[line_number] = line
+
+    raw_cypher = []
+
+    for line in lines:
+        for char in line.split(' '):
+            if char == '':
+                continue
+            raw_cypher.append(char)
+
+    print(raw_cypher)
+
+    counts = {str(c): 0 for c in range(1, 26)}
+    for cc in raw_cypher:
+        counts[cc] += 1
 
     by_frequency = list(reversed(sorted(counts.items(), key=lambda count: count[1])))
-    return with_punct, by_frequency
+    return raw_cypher, by_frequency
 
 
-def brute_1(with_punct, by_frequency ):
-
+def brute_1(with_punct, by_frequency):
     frequency_guess = list(vowels_first)
 
     for i in range(26):
@@ -86,13 +90,12 @@ def try_guess(guess, with_punct, by_frequency):
     print(attempted_solution)
 
 
-def enter_key(with_punct, by_frequency):
+def enter_key(raw_cypher, by_frequency):
     while True:
         key_guess = input('key guess: ')
-        try_guess(list(key_guess), with_punct, by_frequency)
+        try_guess(list(key_guess), raw_cypher, by_frequency)
 
 
 if __name__ == '__main__':
-    include_punct, most_frequent = count_original()
-    enter_key(include_punct, most_frequent)
-
+    _raw_cypher, _most_frequent = count_original()
+    enter_key(_raw_cypher, _most_frequent)

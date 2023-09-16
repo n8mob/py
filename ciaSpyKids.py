@@ -1,21 +1,12 @@
 punctuation = '.,'
 etaoin_shrdlu = 'etaoinshrdlucmfwypvbgkjqxz'
-
-# noinspection SpellCheckingInspection
-key_guesses = {
-    'teaoinshrdlucmfwypvbgkjqxz': '',
-    'etaoinshrdlucmfwypvbgkjqxz': '',
-    'aetoinshrdlucmfwypvbgkjqxz': '',
-    'oetainshrdlucmfwypvbgkjqxz': '',
-    'eaioutnshrdlcmfwypvbgkjqxz': '',
-    'stdoainrelcgmuywpvbfkjqxz':
-        'duringywredytrlywlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilawuedosndtndrsasiksmsootgsofuiabeptndosarslep',
-    'stdoainrelcgmuypwvbfkjqxz':
-        'duringypredytrlyplcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilapuedosndtndrsasiksmsootgsofuiabewtndosarslew',
-    'stdoainrelcgmupywvbfkjqxz':
-        'duringpyredptrlpylcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilayuedosndtndrsasiksmsootgsofuiabewtndosarslew',
-    'stdoainrelcgmuywvpbfkjqxz':
-        '',
+guess_1 = 'teaoinshrdlucmfwypvbgkjqxz'
+guess_2 = 'etaoinshrdlucmfwypvbgkjqxz'
+guess_3 = 'aetoinshrdlucmfwypvbgkjqxz'
+guess_4 = 'oetainshrdlucmfwypvbgkjqxz'
+vowels_first = 'eaioutnshrdlcmfwypvbgkjqxz'
+modified = {
+    'stdoainrelcgmuywpvbfkjqxz': 'duringywredytrlywlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilawuedosndtndrsasiksmsootgsofuiabeptndosarslep',
 }
 
 
@@ -96,13 +87,84 @@ def try_guess(guess, cypher_text, by_frequency):
             attempted_solution += key_guess[cc]
         else:
             attempted_solution += cc
-    print(attempted_solution)
+    return attempted_solution
 
 
-def key_interactive(raw_cypher, by_frequency):
+def enter_key(raw_cypher, by_frequency):
+    tried = {
+        'etaoinshrdlucmfwypvbgkjqxz': 'amhnsufwhrafthdfwdleuehctsomoeatinplehctilnseitrreadleesnuctndiwmraoesatsaheiengeceootueobmnivrytsaoeihedry',
+        'eaioutnshrdlcmfwypvbgkjqxz': 'imstnlfwshifasrfwrdelescanomoeiautpdescaudtneuahheirdeentlcatruwmhioenianiseuetgeceooaleobmtuvhyanioeuserhy',
+        'stdoainrelcgmuywpvbfkjqxz': 'duringywredytrlywlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilawuedosndtndrsasiksmsootgsofuiabeptndosarslep',
+        'stdoainhrelcgmuywpvbfkjqxz': 'dmhincuyhrdutheuyelscshgtnomosdtaiplshgtalinsatrrsdelssnicgtieaymrdosndtndhsasifsgsootcsobmiavrwtndosahserw',
+        'stdoainrelcgmuhywpvbfkjqxz': 'duringhyredhtrlhylcsgsrmtnouosdtaipcsrmtacinsateesdlcssnigmtilayuedosndtndrsasifsmsootgsobuiavewtndosarslew',
+        'stdoainrelcgmuyhwpvbfkjqxz': 'duringyhredytrlyhlcsgsrmtnouosdtaipcsrmtacinsateesdlcssnigmtilahuedosndtndrsasifsmsootgsobuiavewtndosarslew',
+        'stdoainrelcgmuywhpvbfkjqxz': 'duringywredytrlywlcsgsrmtnouosdtaipcsrmtacinsateesdlcssnigmtilawuedosndtndrsasifsmsootgsobuiavehtndosarsleh',
+        'stdoainrelcgmuwyhpvbfkjqxz': 'duringwyredwtrlwylcsgsrmtnouosdtaipcsrmtacinsateesdlcssnigmtilayuedosndtndrsasifsmsootgsobuiavehtndosarsleh',
+        'stdoainrelcgmuyhpvbfkjqxzw': 'duringyhredytrlyhlcsgsrmtnouosdtaivcsrmtacinsateesdlcssnigmtilahuedosndtndrsasiksmsootgsofuiabeptndosarslep',
+        'stdoainrelcgmuhpvbfkjqxzwy': 'duringhpredhtrlhplcsgsrmtnouosdtaibcsrmtacinsateesdlcssnigmtilapuedosndtndrsasijsmsootgsokuiafevtndosarslev',
+        'stdoainrelcgmupvbfkjqxzwyh': 'duringpvredptrlpvlcsgsrmtnouosdtaifcsrmtacinsateesdlcssnigmtilavuedosndtndrsasiqsmsootgsojuiakebtndosarsleb',
+        'stdoainrelcgmuvbfkjqxzwyhp': 'duringvbredvtrlvblcsgsrmtnouosdtaikcsrmtacinsateesdlcssnigmtilabuedosndtndrsasixsmsootgsoquiajeftndosarslef',
+        'stdoainrelcgmubfkjqxzwyhpv': 'duringbfredbtrlbflcsgsrmtnouosdtaijcsrmtacinsateesdlcssnigmtilafuedosndtndrsasizsmsootgsoxuiaqektndosarslek',
+        'stdoainrelcgmufkjqxzwyhpvb': 'duringfkredftrlfklcsgsrmtnouosdtaiqcsrmtacinsateesdlcssnigmtilakuedosndtndrsasiwsmsootgsozuiaxejtndosarslej',
+        'stdoainrelcgmukfjqxzwyhpvb': 'duringkfredktrlkflcsgsrmtnouosdtaiqcsrmtacinsateesdlcssnigmtilafuedosndtndrsasiwsmsootgsozuiaxejtndosarslej',
+        'stdoainrelcgmujfqxzwyhpvbk': 'duringjfredjtrljflcsgsrmtnouosdtaixcsrmtacinsateesdlcssnigmtilafuedosndtndrsasiysmsootgsowuiazeqtndosarsleq',
+        'stdoainrelcgmufjqxzwyhpvbk': 'duringfjredftrlfjlcsgsrmtnouosdtaixcsrmtacinsateesdlcssnigmtilajuedosndtndrsasiysmsootgsowuiazeqtndosarsleq',
+        'stdoainrelcgmujqxzwyhpvbkf': 'duringjqredjtrljqlcsgsrmtnouosdtaizcsrmtacinsateesdlcssnigmtilaquedosndtndrsasihsmsootgsoyuiawextndosarslex',
+        'stdoainrelcgmuqxzwyhpvbkfj': 'duringqxredqtrlqxlcsgsrmtnouosdtaiwcsrmtacinsateesdlcssnigmtilaxuedosndtndrsasipsmsootgsohuiayeztndosarslez',
+        'stdoainrelcgmuxzwyhpvbkfjq': 'duringxzredxtrlxzlcsgsrmtnouosdtaiycsrmtacinsateesdlcssnigmtilazuedosndtndrsasivsmsootgsopuiahewtndosarslew',
+        'stdoainrelcgmuzwyhpvbkfjqx': 'duringzwredztrlzwlcsgsrmtnouosdtaihcsrmtacinsateesdlcssnigmtilawuedosndtndrsasibsmsootgsovuiapeytndosarsley',
+        'stdoainrelcgmuwyhpvbkfjqxz': 'duringwyredwtrlwylcsgsrmtnouosdtaipcsrmtacinsateesdlcssnigmtilayuedosndtndrsasiksmsootgsobuiavehtndosarsleh',
+        'etoianshrdlucmfwypvbgkjqxz': 'omhnsufwhrofthdfwdleuehctsimieotanplehctalnseatrreodleesnuctndawmroiesotsoheaengeceiitueibmnavrytsoieahedry',
+        'etoianshrdlucfmwypvbgkjqxz': 'ofhnsumwhromthdmwdleuehctsifieotanplehctalnseatrreodleesnuctndawfroiesotsoheaengeceiitueibfnavrytsoieahedry',
+        'etdaoinshrlucmfwypvbgkjqxz': 'dmsinufwshdftsrfwrleuesctnamaedtoiplesctolineothhedrleeniuctirowmhdaendtndseoeigeceaatueabmiovhytndaeoserhy',
+        'etdaoinshrlmucfwypvbgkjqxz': 'dcsinmfwshdftsrfwrlemesutnacaedtoiplesutolineothhedrleenimutirowchdaendtndseoeigeueaatmeabciovhytndaeoserhy',
+        'etdaoinshrlumcfwypvbgkjqxz': 'dcsinufwshdftsrfwrleuesmtnacaedtoiplesmtolineothhedrleeniumtirowchdaendtndseoeigemeaatueabciovhytndaeoserhy',
+        'etdaoinshrulmcfwypvbgkjqxz': 'dcsinlfwshdftsrfwruelesmtnacaedtoipuesmtouineothhedrueenilmtirowchdaendtndseoeigemeaatleabciovhytndaeoserhy',
+        'stdoainrelcgmuwhypvbkfjqxz': 'duringwhredwtrlwhlcsgsrmtnouosdtaipcsrmtacinsateesdlcssnigmtilahuedosndtndrsasiksmsootgsobuiaveytndosarsley',
+        'stdaoinrelcgmuwhypvbkfjqxz': 'duringwhredwtrlwhlcsgsrmtnauasdtoipcsrmtocinsoteesdlcssnigmtilohuedasndtndrsosiksmsaatgsabuioveytndasorsley',
+        'stdaionrelcgmuwhypvbkfjqxz': 'durongwhredwtrlwhlcsgsrmtnauasdtiopcsrmticonsiteesdlcssnogmtolihuedasndtndrsisoksmsaatgsabuoiveytndasirsley',
+        'stdaeinrolcgmuwhypvbkfjqxz': 'duringwhrodwtrlwhlcsgsrmtnauasdteipcsrmtecinsetoosdlcssnigmtilehuodasndtndrsesiksmsaatgsabuievoytndasersloy',
+        'stdaeinrolcgmuhwypvbkfjqxz': 'duringhwrodhtrlhwlcsgsrmtnauasdteipcsrmtecinsetoosdlcssnigmtilewuodasndtndrsesiksmsaatgsabuievoytndasersloy',
+        'stdaeinrolcgmuhywpvbkfjqxz': 'duringhyrodhtrlhylcsgsrmtnauasdteipcsrmtecinsetoosdlcssnigmtileyuodasndtndrsesiksmsaatgsabuievowtndaserslow',
+        'stdaeinroclgmuhywpvbkfjqxz': 'duringhyrodhtrchyclsgsrmtnauasdteiplsrmtelinsetoosdclssnigmticeyuodasndtndrsesiksmsaatgsabuievowtndaserscow',
+        'stdaeinroclgmuhwypvbkfjqxz': 'duringhwrodhtrchwclsgsrmtnauasdteiplsrmtelinsetoosdclssnigmticewuodasndtndrsesiksmsaatgsabuievoytndaserscoy',
+        'stdaeinroclgmuwyhpvbkfjqxz': 'duringwyrodwtrcwyclsgsrmtnauasdteiplsrmtelinsetoosdclssnigmticeyuodasndtndrsesiksmsaatgsabuievohtndaserscoh',
+        'stdaeinroclgmuywhpvbkfjqxz': 'duringywrodytrcywclsgsrmtnauasdteiplsrmtelinsetoosdclssnigmticewuodasndtndrsesiksmsaatgsabuievohtndaserscoh',
+        'etdasinroclgmuywhpvbkfjqxz': 'duringywrodytrcywclegermtnauaedtsiplermtslinestooedcleenigmticswuodaendtndreseikemeaatgeabuisvohtndaesrecoh',
+        'etdasinroclgmuwyhpvbkfjqxz': 'duringwyrodwtrcwyclegermtnauaedtsiplermtslinestooedcleenigmticsyuodaendtndreseikemeaatgeabuisvohtndaesrecoh',
+        'etdasinrcolgmuwyhpvbkfjqxz': 'duringwyrcdwtrowyolegermtnauaedtsiplermtslinestccedoleenigmtiosyucdaendtndreseikemeaatgeabuisvchtndaesreoch',
+        'etdasinrclogmuwyhpvbkfjqxz': 'duringwyrcdwtrlwyloegermtnauaedtsipoermtsoinestccedloeenigmtilsyucdaendtndreseikemeaatgeabuisvchtndaesrelch',
+        'etdasinrclwogmuyhpvbkfjqxz': 'dmrinouyrcdutrluylweoergtnamaedtsipwergtswinestccedlweeniogtilsymcdaendtndreseikegeaatoeabmisvchtndaesrelch',
+        'etdasinrclygmuwohpvbkfjqxz': 'duringworcdwtrlwolyegermtnauaedtsipyermtsyinestccedlyeenigmtilsoucdaendtndreseikemeaatgeabuisvchtndaesrelch',
+        'etdasinrlcygmuwohpvbkfjqxz': 'duringworldwtrcwocyegermtnauaedtsipyermtsyinestlledcyeenigmticsouldaendtndreseikemeaatgeabuisvlhtndaesreclh',
+        'eadtsinrlcygmuwohpvbkfjqxz': 'duringworldwarcwocyegermantutedasipyermasyinesalledcyeenigmaicsouldtendandreseikemettagetbuisvlhandtesreclh',
+        'eadcsinrltygmuwohpvbkfjqxz': 'duringworldwartwotyegermancucedasipyermasyinesalledtyeenigmaitsouldcendandreseikemeccagecbuisvlhandcesretlh',
+        'eadlsinrctygmuwohpvbkfjqxz': 'duringworcdwartwotyegermanluledasipyermasyinesaccedtyeenigmaitsoucdlendandreseikemellagelbuisvchandlesretch',
+        'eadcsinrytlgmuwohpvbkfjqxz': 'duringworydwartwotlegermancucedasiplermaslinesayyedtleenigmaitsouydcendandreseikemeccagecbuisvyhandcesretyh',
+        'eadcsinrltmgyuwohpvbkfjqxz': 'duringworldwartwotmegeryancucedasipmeryasminesalledtmeenigyaitsouldcendandreseikeyeccagecbuisvlhandcesretlh',
+        'eadcsinrltmghuwoypvbkfjqxz': 'duringworldwartwotmegerhancucedasipmerhasminesalledtmeenighaitsouldcendandreseikeheccagecbuisvlyandcesretly',
+        'eadcsinrlthgyuwompvbkfjqxz': 'duringworldwartwothegeryancucedasipheryashinesalledtheenigyaitsouldcendandreseikeyeccagecbuisvlmandcesretlm',
+        'eadcsinrlthgvuwompybkfjqxz': 'duringworldwartwothegervancucedasiphervashinesalledtheenigvaitsouldcendandreseikeveccagecbuisylmandcesretlm',
+        'eadcsinrlthgmuwovpybkfjqxz': 'duringworldwartwothegermancucedasiphermashinesalledtheenigmaitsouldcendandreseikemeccagecbuisylvandcesretlv',
+        'eadscinrlthgmuwovpybkfjqxz': 'duringworldwartwothegermansusedaciphermachinecalledtheenigmaitcouldsendandreceikemessagesbuicylvandsecretlv',
+        'eadscinrlthgmuwokpybvfjqxz': 'duringworldwartwothegermansusedaciphermachinecalledtheenigmaitcouldsendandreceivemessagesbuicylkandsecretlk',
+        'eadscinrlthgmuwokpyvbfjqxz': 'duringworldwartwothegermansusedaciphermachinecalledtheenigmaitcouldsendandreceibemessagesvuicylkandsecretlk',
+    }
     while True:
-        key_guess = input('key guess: ')
-        try_guess(list(key_guess), raw_cypher, by_frequency)
+        try:
+            key_guess = input('key guess: ')
+            if key_guess in tried:
+                print(f"already tried '{key_guess}'")
+                print(f"'{tried[key_guess]}'")
+            else:
+                result = try_guess(list(key_guess), raw_cypher, by_frequency)
+                print(result)
+                tried[key_guess] = result
+        except KeyboardInterrupt:
+            print()
+            for guess, result in tried.items():
+                print(f"'{guess}': '{result}',")
+            break
 
 
 def rotate_key(key, cypher_text, by_frequency):
@@ -112,4 +174,4 @@ def rotate_key(key, cypher_text, by_frequency):
 
 if __name__ == '__main__':
     _raw_cypher, _most_frequent = count_original()
-    rotate_key(etaoin_shrdlu, _raw_cypher, _most_frequent)
+    enter_key(_raw_cypher, _most_frequent)

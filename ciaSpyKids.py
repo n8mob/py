@@ -168,8 +168,7 @@ def enter_key(raw_cypher, by_frequency):
 
 
 def rotate_key(key, cypher_text, by_frequency):
-
-
+    pass
 
 
 if __name__ == '__main__':

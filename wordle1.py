@@ -45,11 +45,12 @@ def all_with_prefix(set_dictionary):
     scale_step = math.floor(scale_step / 2)
 
   suffix = input('after: ').lower()
+  remaining = input('remaining: ').lower()
 
   while dictionary[search_index][:prefix_len] == prefix:
     guess = dictionary[search_index]
-    if guess
-    print(f'is it {dictionary[search_index]}?')
+    if guess[-len(suffix):] == suffix and guess:
+      print(f'is it {dictionary[search_index]}?')
     search_index += 1
 
 

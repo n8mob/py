@@ -1,3 +1,5 @@
+"""https://en.wikipedia.org/wiki/Arecibo_message#Message_as_binary_string"""
+
 divided_binary_text = """
 00000010101010000000000
 00101000001010000000100
@@ -73,3 +75,23 @@ divided_binary_text = """
 00000001001010000000000
 01111001111101001111000
 """
+
+
+def plain_print():
+    empty_box = '⬛️'
+    filled_box = '⬜️'
+
+    for c in divided_binary_text:
+        if c == '1':
+            print(filled_box, end='')
+        elif c == '0':
+            print(empty_box, end='')
+        elif c == '\n':
+            print()
+
+
+if __name__ == '__main__':
+    plain_print()
+
+
+

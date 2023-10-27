@@ -1,4 +1,5 @@
 """https://en.wikipedia.org/wiki/Arecibo_message#Message_as_binary_string"""
+import math
 
 divided_binary_text = """
 00000010101010000000000
@@ -77,21 +78,33 @@ divided_binary_text = """
 """
 
 
-def plain_print():
-    empty_box = '⬛️'
-    filled_box = '⬜️'
+def plain_print(bits, wrap):
+    empty_box = '◻'
+    filled_box = '◼'
+    count = [0, 0, 0]
 
-    for c in divided_binary_text:
+    for i, c in enumerate(bits):
         if c == '1':
             print(filled_box, end='')
+            count[1] += 1
         elif c == '0':
             print(empty_box, end='')
-        elif c == '\n':
+            count[0] += 1
+        if i > 0 and i % wrap == 0:
             print()
+            count[2] += 1
+
+    print(f"\n1's: {count[1]}, 0's: {count[0]}, lines: {count[2]}")
 
 
 if __name__ == '__main__':
-    plain_print()
+    plain_bits = divided_binary_text.replace('\n', '')
+    wrap = math.floor(len(plain_bits) / 2)
+    end = False
 
-
+    while not end:
+        plain_print(plain_bits, wrap)
+        wrap = math.ceil(wrap / 2)
+        _input = input(f'Try again with a wrap of {wrap}? Y/n')
+        end = _input and _input.upper().startswith('N')
 

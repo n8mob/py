@@ -1,6 +1,7 @@
 import math
+import re
 
-from word_list import SystemDictionary
+from web_words import WebDictionary
 
 def brute_force_center(dictionary):
   before = input('before: ').lower()
@@ -14,6 +15,19 @@ def brute_force_center(dictionary):
         if guess in dictionary:
           print(guess.upper())
 
+def words_by_regex(set_dictionary):
+  dictionary = sorted(set_dictionary)
+  
+  pattern = input('regex: ')
+  
+  regex = re.compile(f'^{pattern}$')
+  
+  for word in dictionary:
+    if regex.match(word):
+      print(word)
+      
+  print('end')
+  
 
 def all_with_prefix(set_dictionary):
   dictionary = sorted(set_dictionary)
@@ -32,12 +46,17 @@ def all_with_prefix(set_dictionary):
 
   while dictionary[search_index][:prefix_len] != prefix:
     guess = dictionary[search_index]
+    print(f'guess: {guess}')
     guess_check = guess[:prefix_len]
     if guess_check > prefix:
-      print(f'started too high: "{guess}", scaling by {scale_step}')
+      print('started too high')
+      print(guess)
+      print('scaling by ' + str(scale_step))
       search_index -= scale_step
     elif guess_check < prefix:
-      print(f'started too low: "{guess}", scaling by {scale_step}')
+      print('started too low')
+      print(guess)
+      print('scaling by ' + str(scale_step))
       search_index += scale_step
     else:
       print(f'is {guess} correct?')
@@ -45,15 +64,18 @@ def all_with_prefix(set_dictionary):
     scale_step = math.floor(scale_step / 2)
 
   suffix = input('after: ').lower()
+  
+  guess = dictionary[search_index]
 
-  while dictionary[search_index][:prefix_len] == prefix:
-    guess = dictionary[search_index]
-    if guess
-    print(f'is it {dictionary[search_index]}?')
+  while guess[:prefix_len] == prefix:
+    print(f'is it {guess}?')
     search_index += 1
+    guess = dictionary[search_index]
 
 
 if __name__ == '__main__':
-  system_dict = SystemDictionary.by_length[5]
+  web_dict = WebDictionary()
+  d = web_dict.by_length[5]
 
-  all_with_prefix(system_dict)
+  words_by_regex(d)
+  

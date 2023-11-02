@@ -28,3 +28,4 @@ class SystemDictionary:
                 by_first_letter[word[0]] = [word]
             else:
                 by_first_letter[word[0]].append(word)
+              

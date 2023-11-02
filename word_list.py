@@ -1,31 +1,44 @@
 class SystemDictionary:
-    base_path = '/usr/share/dict/'
-    by_length = {}
-    by_first_letter = {}
-    proper_names = set()
+  def __init__(self):
+    self.base_path = '/usr/share/dict/'
+    self.by_length = {}
+    self.by_first_letter = {}
+    self.proper_names = set()
+    # noinspection SpellCheckingInspection
+    with open(self.base_path + 'propernames') as proper_names_file:
+      for name in proper_names_file.read().split('\n'):
+        if name:
+          self.proper_names.add(name)
 
-    with open(base_path + 'propernames') as proper_names_file:
-        for name in proper_names_file.read().split('\n'):
-            if name:
-                proper_names.add(name)
+    with open(self.base_path + 'words') as word_list:
+      for word in word_list.read().split('\n'):
+        if not word or word in self.proper_names:
+          continue
+        assert not word[-1] == '\n'
+
+        word = word.lower()
+
+        wl = len(word)
+        if wl not in self.by_length:
+          print(f'first word of length {wl}: {word}')
+          self.by_length[wl] = set()
+
+        self.by_length[wl].add(word)
+
+        first_letter = word[0]
+        if first_letter not in self.by_first_letter:
+          print(f'first word starting with {first_letter}: {word}')
+          self.by_first_letter[first_letter] = []
+
+        self.by_first_letter[first_letter].append(word)
 
 
-    with open(base_path + 'words') as word_list:
-        for word in word_list.read().split('\n'):
-            if not word or word in proper_names:
-                continue
-            assert not word[-1] == '\n'
+if __name__ == '__main__':
+  d = SystemDictionary()
+  for word_length in d.by_length:
+    count = len(d.by_length[word_length])
+    print(f'{count} words of length {word_length}')
 
-            word = word.lower()
-
-            l = len(word)
-            if l not in by_length:
-                by_length[l] = set(word)
-            else:
-                by_length[l].add(word)
-
-            if word[0] not in by_first_letter:
-                by_first_letter[word[0]] = [word]
-            else:
-                by_first_letter[word[0]].append(word)
-              
+  for letter in d.by_first_letter:
+    count = len(d.by_first_letter[letter])
+    print(f'{letter}: {count} words')

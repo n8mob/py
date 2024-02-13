@@ -17,9 +17,9 @@ class Rot:
   def ints_from_string(self, st, n=0):
     return [self.a_zero(c) if c in string.ascii_letters else '' for c in st]
 
-  def rot_char(self, n, m, c):
+  def rot_char(self, n, m, c, retain_space = True):
     encoded = self.a_zero(c)
-    if encoded not in range (0, m):
+    if retain_space and encoded not in range (0, m):
       return c
 
     num = (encoded + n) % m
@@ -108,9 +108,16 @@ class TestRestOfRot(TestCase):
   def test_rotYby1(self):
     self.assertEqual('Z', self.unit_under_test.rot_char(1, 26, 'y'))
 
-  def test_rotSpace(self):
+  def test_retainSpace(self):
     self.assertEqual(' ', self.unit_under_test.rot_char(13, 26, ' '))
     self.assertEqual(' ', self.unit_under_test.rot_char(1, 26, ' '))
+
+  def test_doNotRetainSpace(self):
+    self.assertEqual('U', self.unit_under_test.rot_char(1, 26, ' ', retain_space=False))
+    self.assertEqual('Y', self.unit_under_test.rot_char(5, 26, ' ', retain_space=False))
+    self.assertEqual('Z', self.unit_under_test.rot_char(6, 26, ' ', retain_space=False))
+    self.assertEqual('A', self.unit_under_test.rot_char(7, 26, ' ', retain_space=False))
+    self.assertEqual('B', self.unit_under_test.rot_char(8, 26, ' ', retain_space=False))
 
   def test_rotAlphabetBy1(self):
     rot1alphabet = 'BCDEFGHIJKLMNOPQRSTUVWXYZA'
@@ -119,6 +126,9 @@ class TestRestOfRot(TestCase):
   def test_rotAlphabetBy13(self):
     rot13alphabet = 'NOPQRSTUVWXYZABCDEFGHIJKLM'
     self.assertEqual(rot13alphabet, self.unit_under_test.rot_string(13, 26, string.ascii_lowercase))
+
+  def test_rotStringWithSpace(self):
+    self.assertEqual('C D', self.unit_under_test.rot_string(2, 26, 'a b'))
 
   def test_applyKeyBBB(self):
     self.assertEqual('BCD', self.unit_under_test.apply_key('bbb', 'abc'))

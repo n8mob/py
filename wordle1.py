@@ -1,5 +1,6 @@
 import math
 import re
+import sys
 
 from web_words import WebDictionary
 
@@ -78,4 +79,5 @@ if __name__ == '__main__':
   d = web_dict.by_length[5]
 
   words_by_regex(d)
+  sys.exit(0)
   

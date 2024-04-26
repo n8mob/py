@@ -2,15 +2,11 @@
 import os
 import shutil
 import sys
+import logging
 
-
-
-
-def move_with_backup(src_file_path, copy_dest_dir, move_dest_dir):
-  shutil.copy2(src_file_path, copy_dest_dir)
-  shutil.move(src_file_path, move_dest_dir)
 
 if __name__ == '__main__':
+  log = logging.getLogger()
   file_list_path = sys.argv[1]
   copy_dest_dir = sys.argv[2]
   move_dest_dir = sys.argv[3]
@@ -33,5 +29,18 @@ if __name__ == '__main__':
   else:
     print(f'move destination ({move_dest_dir}) does not exist')
 
-  for file_name in file_list:
-    move_with_backup(file_name, copy_dest_dir, move_dest_dir)
+  file_count = len(file_list)
+
+  for i, file_path in enumerate(file_list):
+    file_path = file_path.strip()
+    if not file_path:
+      continue
+    if not os.path.exists(file_path):
+      log.error(f'file {i:02}/{file_count}\t{file_path}\t\tdoes not exist')
+      continue
+
+    print(f'{i:02}/{file_count}\t{file_path}\t', end='', flush=True)
+    shutil.copy2(file_path, copy_dest_dir)
+    print('copied\t', end='', flush=True)
+    shutil.move(file_path, move_dest_dir)
+    print('moved\t', flush=True)

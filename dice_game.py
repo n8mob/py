@@ -16,21 +16,38 @@ dice_size = floor(dice_space * 0.6)
 def init_dice():
   for i in range(0, no_dice):
     button = ui.Button()
-    num = random.randint(1,6)
-    d.append([button, num])
-    button.title = str(num)
+    d.append(button)
+    
+    button.num = random.randint(1,6)
+    button.title = str(button.num)
+    button.hold = False
+
     die_x = (i * dice_space) + half_die
     button.center = (die_x, dice_center_y)
     button.width = dice_size
     button.height = dice_size
     button.border_color = 'teal'
     button.border_width = 1
+    button.action = dice_click
+    button.index = i
     v.add_subview(button)
+    
+def dice_click(sender):
+  if not sender.hold:
+    sender.hold = True
+    sender.border_color = '#7106db'
+    sender.border_width = 3
+  else:
+    sender.hold = False
+    sender.border_color = 'teal'
+    sender.border_width = 1
   
 def roll(sender):
   for i in range(len(d)):
-    num = random.randint(1,6)
-    d[i][0].title = str(num)
+    if not d[i].hold:
+      num = random.randint(1,6)
+      d[i].num = num
+      d[i].title = str(num)
     
 roll_button = ui.Button()
 roll_button.center = (dice_size * 3, dice_center_y * 3)

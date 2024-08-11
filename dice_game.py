@@ -27,6 +27,7 @@ class DiceRoller:
 
     self.dice = []
     self.init_dice()
+    self.score_button = self.init_score_button()
     self.roll_button = self.init_roll_button()
 
   def init_dice(self):
@@ -62,7 +63,7 @@ class DiceRoller:
 
   def init_roll_button(self):
     roll_button = ui.Button()
-    roll_button.center = (self.dice_size * 3, self.dice_center_y * 2)
+    roll_button.center = (self.dice_size, self.dice_center_y * 2)
     roll_button.title = 'Roll'
     roll_button.width = 80
     roll_button.height = self.dice_size
@@ -71,6 +72,18 @@ class DiceRoller:
     roll_button.action = self.roll
     self.view.add_subview(roll_button)
     return roll_button
+    
+  def init_score_button(self):
+    score_button = ui.Button()
+    score_button.center = (self.dice_size * 3, self.dice_center_y * 2)
+    score_button.title = 'Score'
+    score_button.width = 80
+    score_button.height = self.dice_size
+    score_button.border_color = 'teal'
+    score_button.border_width = 2
+    score_button.action = self.score
+    self.view.add_subview(score_button)
+    return score_button
 
   def roll(self, sender):
     if not self.dice:
@@ -82,14 +95,21 @@ class DiceRoller:
           num = random.randint(1, 6)
           die.num = num
           die.title = str(num)
-
+    self.roll_score = sum(
+      [d.num for d in self.dice]
+      )
+    self.score_button.title = str(self.roll_score)
+          
+  def score(self, sender):
+    pass
+    
 
 if __name__ == '__main__':
   v = ui.load_view()
   v.width = ui.get_window_size().x
   v.height = ui.get_window_size().y
   v.flex = 'WH'
-  dice = DiceRoller(v)
+  roller = DiceRoller(v)
 
   v.present('sheet')
 

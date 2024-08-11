@@ -4,8 +4,45 @@ import ui
 import logging
 
 
-class DiceRoller:
+class ScoreSheet:
+  def __init__():
+    self.top = {
+      'ones': None,
+      'twos': None,
+      'threes': None,
+      'fours': None,
+      'fives': None,
+      'sixes': None
+    }
+    self.bottom = {
+      'three of a kind': None,
+      'four of a kind': None,
+      'full house': None,
+      'big five': [],
+      'chance': None
+    }
+    
+    self.top_total = 0
+    self.bottom_total = 0
+    
+    
+class Turn:
+  def __init__(
+    self,
+    player_name,
+    rolls=3):
+    self.rolls = rolls
+    self.turn_rolls = rolls
+    
+  def roll(self):
+    if self.turn_rolls > 0:
+      self.turn_rolls -= 1
+      return True
+    else:
+      return False
+    
 
+class DiceRoller:
   def __init__(
     self,
     view: ui.View,
@@ -29,6 +66,7 @@ class DiceRoller:
     self.init_dice()
     self.score_button = self.init_score_button()
     self.roll_button = self.init_roll_button()
+    self.turn = None
 
   def init_dice(self):
     dice_space = self.view.frame.size.x // self.no_dice
@@ -36,7 +74,7 @@ class DiceRoller:
     for i in range(self.no_dice):
       button = ui.Button()
       button.num = random.randint(1, 6)
-      button.title = str(button.num)
+      button.title = 'ready'
       button.hold = False
 
       die_x = (i * dice_space) + die_margin
@@ -89,20 +127,27 @@ class DiceRoller:
     if not self.dice:
       self.log.error('no dice, son')
       return
-    else:
+    
+    if not self.turn:
+      self.turn = Turn('Player')
+    
+    if self.turn.roll():
       for die in self.dice:
         if not die.hold:
           num = random.randint(1, 6)
           die.num = num
           die.title = str(num)
+          
+  def score(self, sender):
     self.roll_score = sum(
       [d.num for d in self.dice]
       )
     self.score_button.title = str(self.roll_score)
-          
-  def score(self, sender):
-    pass
+    for die in self.dice:
+      die.hold = False
+      die.title = 'next'
     
+    self.turn = None
 
 if __name__ == '__main__':
   v = ui.load_view()

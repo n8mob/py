@@ -77,7 +77,11 @@ def all_with_prefix(set_dictionary):
 if __name__ == '__main__':
   web_dict = WebDictionary()
   d = web_dict.by_length[5]
-
-  words_by_regex(d)
+  
+  another = True
+  
+  while another:
+    words_by_regex(d)
+    another = bool(input('another? '))
   sys.exit(0)
   

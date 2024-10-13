@@ -5,18 +5,18 @@ import busio
 import digitalio
 from busio import I2C
 
-PIN = board.D18
+BOARD_LED = board.D18
 
 
 def say_hello():
     print('Hello, blinka!')
-    led = digitalio.DigitalInOut(PIN)
+    led = digitalio.DigitalInOut(BOARD_LED)
     led.direction = digitalio.Direction.OUTPUT
     while True:
         led.value = True
-        time.sleep(0.5)
+        time.sleep(0.25)
         led.value = False
-        time.sleep(0.5)
+        time.sleep(0.25)
 
 
 say_hello()

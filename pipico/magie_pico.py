@@ -13,8 +13,8 @@ class MAGiE:
     self.next_bit = None
     self.button_states = None
     self.inputs = None
-    self.outputs = None
-    self.next_bit = None
+    self.current_byte = None
+    self.memory = []
     self.OUT_BITS = [
       board.GP16,
       board.GP17,
@@ -30,7 +30,7 @@ class MAGiE:
       board.GP14,
       board.GP15
     ]
-    self.outputs = self.load_the_lights()
+    self.current_byte = self.load_the_lights()
     self.inputs = self.load_the_buttons()
     self.button_states = [button.value for button in self.inputs]
     self.next_bit = 0
@@ -56,16 +56,22 @@ class MAGiE:
     return buttons
 
   def set_next_bit(self, value):
-    self.outputs[self.next_bit].value = value
+    self.current_byte[self.next_bit].value = value
     print(f'Setting bit {self.next_bit} to {value}')
-    self.next_bit = (self.next_bit + 1) % len(self.outputs)
+    self.next_bit = (self.next_bit + 1) % len(self.current_byte)
     time.sleep(0.1)
 
   def reset_bits(self):
-    for light in self.outputs:
-      light.value = False
-    self.next_bit = 0
     print('Resetting bits')
+
+    byte_value = 0
+    for i, light in enumerate(self.current_byte):
+      if light.value:
+        byte_value |= (1 << i)
+      light.value = False
+      time.sleep(0.06) # a little animation effect
+    self.memory.append(byte_value)
+    self.next_bit = 0
     time.sleep(0.1)
 
   def debounce(self, button_index):

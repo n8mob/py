@@ -5,6 +5,8 @@ from tkinter import filedialog, messagebox, ttk
 
 from pdfinspect.utility import fetch_data
 
+TEXT_WIDTH_FACTOR = 10
+
 
 class PDFStreamInspector(tk.Tk):
   def __init__(self):
@@ -82,17 +84,33 @@ class PDFStreamInspector(tk.Tk):
     if self.detail_text:
       self.detail_text.destroy()
 
-    self.treeview = ttk.Treeview(self, columns=("ID", "Parent ID", "headings"))
-    self.treeview.heading("ID", text="Stream ID")
-    self.treeview.heading("Parent ID", text="Parent ID")
+    paned_window = tk.PanedWindow(self, orient=tk.HORIZONTAL)
+    paned_window.pack(fill=tk.BOTH, expand=True)
+
+    self.treeview = ttk.Treeview(paned_window)
+    self.treeview.heading("#0", text="Stream Information", anchor=tk.W)
     self.treeview.pack(side=tk.LEFT, fill=tk.Y)
     self.treeview.bind("<<TreeviewSelect>>", self.on_select)
 
-    self.detail_text = tk.Text(self, wrap=tk.WORD)
+    paned_window.add(self.treeview)
+
+    self.detail_text = tk.Text(paned_window, wrap=tk.WORD)
     self.detail_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
+    paned_window.add(self.detail_text)
+
+    max_width = 200
+
     for item in self.data:
-      self.treeview.insert("", tk.END, values=(item[0], item[1], item[2]))
+      tree_node_name = f'{item[0]} - {item[2]}'
+      if item[1]:
+        tree_node_name = f'{item[1]}/{tree_node_name}'
+
+      self.treeview.insert("", tk.END, text=tree_node_name, values=(item[0], item[1], item[2]))
+      if max_width < len(tree_node_name) * TEXT_WIDTH_FACTOR:
+        max_width = len(tree_node_name) * TEXT_WIDTH_FACTOR
+
+    self.treeview.column("#0", width=200, anchor=tk.W)
 
   def on_select(self, event):
     selected_item = self.treeview.selection()[0]

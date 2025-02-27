@@ -20,10 +20,12 @@ class PDFStreamInspector(tk.Tk):
     self.detail_text = None
     self.listbox = None
     self.title("PDF Stream Inspector")
-    self.geometry("800x600")
-
+    self.geometry("1600x1200")
     self.create_menu()
     self.db_path = None
+
+    self.lift()
+    self.focus_force()
 
   def create_menu(self):
     menu_bar = tk.Menu(self)

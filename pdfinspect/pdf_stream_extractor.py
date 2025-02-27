@@ -1,8 +1,10 @@
+# pdf_stream_extractor.py
 import argparse
-import os
 import re
 import sqlite3
 import zlib
+
+from pdf_db_filename import get_db_path
 
 
 def create_database(db_name):
@@ -31,14 +33,7 @@ def insert_data(conn, dictionary, decompressed_stream, parent_id=None):
 
 
 def main(args):
-  if not args.db_path:
-    args.db_path = os.path.dirname(args.filename)
-
-  if os.path.isdir(args.db_path):
-    pdf_filename = os.path.basename(args.filename)
-    db_filename = os.path.splitext(pdf_filename)[0] + '.db'
-    args.db_path = os.path.join(args.db_path, db_filename)
-
+  args.db_path = get_db_path(args.filename, args.db_path)
   conn = create_database(args.db_path)
   with open(args.filename, "rb") as f:
     data = f.read()
@@ -58,8 +53,7 @@ def main(args):
           nested_dict_str = nested_dict.decode(errors="ignore")
           nested_decompressed_str = zlib.decompress(nested_stream).decode(errors="ignore")
           insert_data(conn, nested_dict_str, nested_decompressed_str, parent_id)
-      except zlib.error as zer:
-        decompressed_str = f'Zlib error: {zer}\n{stream.decode(errors="ignore")}'
+      except zlib.error:
         insert_data(conn, dict_str, stream)
     else:
       insert_data(conn, dict_str, decompressed_str)
@@ -70,11 +64,6 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Extract streams from a PDF file and store in SQLite database")
   parser.add_argument("filename", help="The PDF file from which to extract streams")
   parser.add_argument("--decompress", help="Decompress the stream using zlib", action="store_true", default=True)
-  parser.add_argument(
-    "--db-path",
-    help="Path to the SQLite database file to store the extracted streams",
-    default=None
-  )
+  parser.add_argument("--db-path", help="Path to the SQLite database file to store the extracted streams", default=None)
   script_args = parser.parse_args()
-
   main(script_args)

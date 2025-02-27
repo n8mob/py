@@ -1,7 +1,10 @@
+# gui.py
 import sqlite3
 import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
+from pdf_db_filename import get_db_path
 
 
 def fetch_data(db_path):
@@ -52,20 +55,27 @@ class PDFStreamInspector(tk.Tk):
       filetypes=(("PDF Files", "*.pdf"), ("All Files", "*.*"))
     )
     if pdf_path:
+      db_path = get_db_path(pdf_path)
+
       db_path = filedialog.asksaveasfilename(
         title="Save Database As",
         defaultextension=".db",
-        filetypes=(("SQLite Database Files", "*.db"), ("All Files", "*.*"))
+        filetypes=(("SQLite Database Files", "*.db"), ("All Files", "*.*")),
+        initialfile=db_path
       )
-      if db_path:
-        try:
-          subprocess.run(["python", "pdf_stream_extractor.py", pdf_path, "--db-path", db_path], check=True)
+
+      try:
+        result = subprocess.run(["python", "pdf_stream_extractor.py", pdf_path, "--db-path", db_path], check=True)
+        if result.returncode == 0:
           messagebox.showinfo("Success", "Database created successfully!")
-          self.db_path = db_path
-          self.data = fetch_data(self.db_path)
-          self.create_widgets()
-        except subprocess.CalledProcessError as e:
-          messagebox.showerror("Error", f"Failed to create database: {e}")
+        else:
+          messagebox.showerror("Error", f'Failed to create database\n\n{result.stderr}')
+
+        self.db_path = db_path
+        self.data = fetch_data(self.db_path)
+        self.create_widgets()
+      except subprocess.CalledProcessError as e:
+        messagebox.showerror("Error", f"Failed to create database: {e}")
 
   def create_widgets(self):
     if self.listbox:

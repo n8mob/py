@@ -1,4 +1,3 @@
-# pdf_stream_extractor.py
 import argparse
 import re
 import sqlite3
@@ -11,14 +10,14 @@ def create_database(db_name):
   conn = sqlite3.connect(db_name)
   cursor = conn.cursor()
   cursor.execute("""
-  CREATE TABLE IF NOT EXISTS pdf_streams (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    parent_id INTEGER,
-    dictionary TEXT,
-    decompressed_stream TEXT,
-    FOREIGN KEY(parent_id) REFERENCES pdf_streams(id)
-  )
-  """)
+    CREATE TABLE IF NOT EXISTS pdf_streams (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        parent_id INTEGER,
+        dictionary TEXT,
+        decompressed_stream TEXT,
+        FOREIGN KEY(parent_id) REFERENCES pdf_streams(id)
+    )
+    """)
   conn.commit()
   return conn
 
@@ -26,8 +25,8 @@ def create_database(db_name):
 def insert_data(conn, dictionary, decompressed_stream, parent_id=None):
   cursor = conn.cursor()
   cursor.execute("""
-  INSERT INTO pdf_streams (parent_id, dictionary, decompressed_stream)
-  VALUES (?, ?, ?)""",(parent_id, dictionary, decompressed_stream))
+    INSERT INTO pdf_streams (parent_id, dictionary, decompressed_stream)
+    VALUES (?, ?, ?)""", (parent_id, dictionary, decompressed_stream))
   conn.commit()
   return cursor.lastrowid
 
@@ -46,13 +45,11 @@ def main(args):
       try:
         decompressed = zlib.decompress(stream)
         decompressed_str = decompressed.decode(errors="ignore")
-        nested_pattern = re.compile(rb'(<<.*?>>)\s*stream\s*(.*?)\s*endstream', re.DOTALL)
-        nested_matches = nested_pattern.findall(decompressed)
+        nested_dict_pattern = re.compile(r'<<.*?>>', re.DOTALL)
+        nested_dicts = nested_dict_pattern.findall(decompressed_str)
         parent_id = insert_data(conn, dict_str, decompressed_str)
-        for nested_dict, nested_stream in nested_matches:
-          nested_dict_str = nested_dict.decode(errors="ignore")
-          nested_decompressed_str = zlib.decompress(nested_stream).decode(errors="ignore")
-          insert_data(conn, nested_dict_str, nested_decompressed_str, parent_id)
+        for nested_dict in nested_dicts:
+          insert_data(conn, nested_dict, "", parent_id)
       except zlib.error:
         insert_data(conn, dict_str, stream)
     else:

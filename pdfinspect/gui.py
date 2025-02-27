@@ -7,7 +7,7 @@ from tkinter import filedialog, messagebox
 def fetch_data(db_path):
   conn = sqlite3.connect(db_path)
   cursor = conn.cursor()
-  cursor.execute("SELECT id, dictionary, decompressed_stream FROM pdf_streams")
+  cursor.execute("SELECT id, parent_id, dictionary, decompressed_stream FROM pdf_streams")
   data = cursor.fetchall()
   conn.close()
   return data
@@ -16,6 +16,7 @@ def fetch_data(db_path):
 class PDFStreamInspector(tk.Tk):
   def __init__(self):
     super().__init__()
+    self.data = None
     self.detail_text = None
     self.listbox = None
     self.title("PDF Stream Inspector")
@@ -78,14 +79,14 @@ class PDFStreamInspector(tk.Tk):
     self.detail_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
     for item in self.data:
-      self.listbox.insert(tk.END, f"Stream ID: {item[0]}")
+      self.listbox.insert(tk.END, f"Stream ID: {item[0]} (Parent ID: {item[1]})")
 
   def on_select(self, event):
     selected_index = self.listbox.curselection()[0]
     selected_item = self.data[selected_index]
 
     self.detail_text.delete(1.0, tk.END)
-    self.detail_text.insert(tk.END, f"Dictionary:\n{selected_item[1]}\n\nDecompressed Stream:\n{selected_item[2]}")
+    self.detail_text.insert(tk.END, f"Dictionary:\n{selected_item[2]}\n\nDecompressed Stream:\n{selected_item[3]}")
 
 
 if __name__ == "__main__":

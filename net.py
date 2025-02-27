@@ -1,5 +1,5 @@
 import socket
-import subprocess
+import psutil
 
 
 def get_ip_address():
@@ -8,11 +8,6 @@ def get_ip_address():
     return s.getsockname()[0]
 
 
-def run_ipconfig():
-    return subprocess.check_output(['ipconfig', 'getiflist']).split()
-
-
 if __name__ == '__main__':
     print(f'ip address: {get_ip_address()}')
-    print(run_ipconfig())
     

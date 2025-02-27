@@ -1,19 +1,10 @@
 # gui.py
-import sqlite3
 import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-from pdf_db_filename import get_db_path
-
-
-def fetch_data(db_path):
-  conn = sqlite3.connect(db_path)
-  cursor = conn.cursor()
-  cursor.execute("SELECT id, parent_id, dictionary, decompressed_stream FROM pdf_streams")
-  data = cursor.fetchall()
-  conn.close()
-  return data
+from pdfinspect.utility import fetch_data
+from utility import get_db_path
 
 
 class PDFStreamInspector(tk.Tk):

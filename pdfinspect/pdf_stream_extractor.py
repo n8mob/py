@@ -4,7 +4,7 @@ import re
 import sqlite3
 import zlib
 
-from pdf_db_filename import get_db_path
+from utility import get_db_path
 
 
 def create_database(db_name):

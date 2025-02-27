@@ -3,6 +3,7 @@ import sqlite3
 
 
 def get_db_path(pdf_path, db_path=None):
+  """Create a path for a new .db file based on the path and name of a PDF file."""
   if not db_path:
     db_path = os.path.dirname(pdf_path)
   if os.path.isdir(db_path):

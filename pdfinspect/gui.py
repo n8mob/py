@@ -1,10 +1,9 @@
-# gui.py
+import os
 import subprocess
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 
 from pdfinspect.utility import fetch_data
-from utility import get_db_path
 
 
 class PDFStreamInspector(tk.Tk):
@@ -12,7 +11,7 @@ class PDFStreamInspector(tk.Tk):
     super().__init__()
     self.data = None
     self.detail_text = None
-    self.listbox = None
+    self.treeview = None
     self.title("PDF Stream Inspector")
     self.geometry("1600x1200")
     self.create_menu()
@@ -45,48 +44,61 @@ class PDFStreamInspector(tk.Tk):
       title="Select PDF File",
       filetypes=(("PDF Files", "*.pdf"), ("All Files", "*.*"))
     )
+
     if pdf_path:
-      db_path = get_db_path(pdf_path)
+      pdf_dir = os.path.dirname(pdf_path)
+      pdf_filename = os.path.basename(pdf_path)
+    else:
+      messagebox.showerror("Error", "No PDF file selected")
+      return
 
-      db_path = filedialog.asksaveasfilename(
-        title="Save Database As",
-        defaultextension=".db",
-        filetypes=(("SQLite Database Files", "*.db"), ("All Files", "*.*")),
-        initialfile=db_path
-      )
+    db_path = filedialog.asksaveasfilename(
+      title="Save Database As",
+      defaultextension=".db",
+      filetypes=(("SQLite Database Files", "*.db"), ("All Files", "*.*")),
+      initialdir=pdf_dir,
+      initialfile=pdf_filename.replace(".pdf", "_pdf")
+    )
 
-      try:
-        result = subprocess.run(["python", "pdf_stream_extractor.py", pdf_path, "--db-path", db_path], check=True)
-        if result.returncode == 0:
-          messagebox.showinfo("Success", "Database created successfully!")
-        else:
-          messagebox.showerror("Error", f'Failed to create database\n\n{result.stderr}')
+    if not db_path:
+      messagebox.showerror("Error", "No database filename selected")
+      return
 
-        self.db_path = db_path
-        self.data = fetch_data(self.db_path)
-        self.create_widgets()
-      except subprocess.CalledProcessError as e:
-        messagebox.showerror("Error", f"Failed to create database: {e}")
+
+    try:
+      result = subprocess.run(["python", "pdf_stream_extractor.py", pdf_path, "--db-path", db_path], check=True)
+      if result.returncode == 0:
+        messagebox.showinfo("Success", "Database created successfully!")
+      else:
+        messagebox.showerror("Error", f'Failed to create database\n\n{result.stderr}')
+
+      self.db_path = db_path
+      self.data = fetch_data(self.db_path)
+      self.create_widgets()
+    except subprocess.CalledProcessError as e:
+      messagebox.showerror("Error", f"Failed to create database: {e}")
 
   def create_widgets(self):
-    if self.listbox:
-      self.listbox.destroy()
     if self.detail_text:
       self.detail_text.destroy()
 
-    self.listbox = tk.Listbox(self, width=40)
-    self.listbox.pack(side=tk.LEFT, fill=tk.Y)
-    self.listbox.bind("<<ListboxSelect>>", self.on_select)
+    self.treeview = ttk.Treeview(self, columns=("ID", "Parent ID", "headings"))
+    self.treeview.heading("ID", text="Stream ID")
+    self.treeview.heading("Parent ID", text="Parent ID")
+    self.treeview.pack(side=tk.LEFT, fill=tk.Y)
+    self.treeview.bind("<<TreeviewSelect>>", self.on_select)
 
     self.detail_text = tk.Text(self, wrap=tk.WORD)
     self.detail_text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
     for item in self.data:
-      self.listbox.insert(tk.END, f"Stream ID: {item[0]} (Parent ID: {item[1]})")
+      self.treeview.insert("", tk.END, values=(item[0], item[1], item[2]))
 
   def on_select(self, event):
-    selected_index = self.listbox.curselection()[0]
-    selected_item = self.data[selected_index]
+    selected_item = self.treeview.selection()[0]
+    item = self.treeview.item(selected_item)
+    selected_index = self.treeview.index(selected_item)
+    selected_data = self.data[selected_index]
 
     self.detail_text.delete(1.0, tk.END)
     self.detail_text.insert(tk.END, f"Dictionary:\n{selected_item[2]}\n\nDecompressed Stream:\n{selected_item[3]}")

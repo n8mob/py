@@ -100,13 +100,14 @@ class PDFStreamInspector(tk.Tk):
     paned_window.add(self.detail_text)
 
     max_width = 200
+    parent_id_map = {}
 
     for item in self.data:
       tree_node_name = f'{item[0]} - {item[2]}'
-      if item[1]:
-        tree_node_name = f'{item[1]}/{tree_node_name}'
+      parent_tree_id = parent_id_map.get(item[1], '')
 
-      self.treeview.insert("", tk.END, text=tree_node_name, values=(item[0], item[1], item[2]))
+      tree_id = self.treeview.insert(parent_tree_id, tk.END, text=tree_node_name, values=(item[0], item[1], item[2]))
+      parent_id_map[item[0]] = tree_id
       if max_width < len(tree_node_name) * TEXT_WIDTH_FACTOR:
         max_width = len(tree_node_name) * TEXT_WIDTH_FACTOR
 

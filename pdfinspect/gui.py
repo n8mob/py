@@ -119,7 +119,7 @@ class PDFStreamInspector(tk.Tk):
     selected_data = self.data[selected_index]
 
     self.detail_text.delete(1.0, tk.END)
-    self.detail_text.insert(tk.END, f"Dictionary:\n{selected_item[2]}\n\nDecompressed Stream:\n{selected_item[3]}")
+    self.detail_text.insert(tk.END, f"Dictionary:\n{selected_data[2]}\n\nDecompressed Stream:\n{selected_data[3]}")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import string
+import unittest
 from unittest import TestCase
 
 
@@ -138,3 +139,7 @@ class TestRestOfRot(TestCase):
 
   def test_applyKeyBC(self):
     self.assertEqual('CD', self.unit_under_test.apply_key('bc', 'bb'))
+    
+
+if __name__ == '__main__':
+  unittest.main()

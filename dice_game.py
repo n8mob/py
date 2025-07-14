@@ -4,8 +4,8 @@ import ui
 import logging
 
 
-class ScoreSheet:
-  def __init__():
+class PlayerScore:
+  def __init__(self):
     self.top = {
       'ones': None,
       'twos': None,
@@ -24,7 +24,24 @@ class ScoreSheet:
     
     self.top_total = 0
     self.bottom_total = 0
+
+
+class ScoreDisplay:
+  def __init__(self, view:ui.View):
+    self.view = view
+    player_score = PlayerScore()
+    prev_y = 0
+    for s in player_score.top:
+      l = ui.Label()
+      y = prev_y + 200
+      l.frame = (20, y, 40, 100)
+      prev_y = y + l.frame.height
+      l.text = s
+      self.view.add_subview(l)
+    ui.Label
     
+  def score(self):
+    pass
     
 class Turn:
   def __init__(
@@ -138,7 +155,11 @@ class DiceRoller:
           die.num = num
           die.title = str(num)
           
-  def score(self, sender):
+  def score(
+    self,
+    sender,
+    score_sheet:PlayerScore
+  ):
     self.roll_score = sum(
       [d.num for d in self.dice]
       )
@@ -148,6 +169,7 @@ class DiceRoller:
       die.title = 'next'
     
     self.turn = None
+    
 
 if __name__ == '__main__':
   v = ui.load_view()
@@ -155,6 +177,8 @@ if __name__ == '__main__':
   v.height = ui.get_window_size().y
   v.flex = 'WH'
   roller = DiceRoller(v)
+  scorer = PlayerScore()
+  score_display = ScoreDisplay(v)
 
   v.present('sheet')
 

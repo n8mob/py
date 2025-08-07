@@ -1,4 +1,5 @@
 import string
+import sys
 import unittest
 from unittest import TestCase
 
@@ -139,7 +140,14 @@ class TestRestOfRot(TestCase):
 
   def test_applyKeyBC(self):
     self.assertEqual('CD', self.unit_under_test.apply_key('bc', 'bb'))
-    
+
 
 if __name__ == '__main__':
-  unittest.main()
+  rot = Rot()
+  dont_quit = True
+  while dont_quit:
+    inpt = input('Enter a string to ROT (or "QUIT" to quit): ')
+    if inpt.upper() == 'QUIT':
+      dont_quit = False
+      sys.exit(0)
+    print(rot.rot_string(1, 26, inpt))

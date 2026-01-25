@@ -2,7 +2,7 @@ import time
 import board
 import digitalio
 import pwmio
-from digitalio import DigitalInOut, DriveMode
+from digitalio import DigitalInOut
 from pwmio import PWMOut
 
 
@@ -33,9 +33,9 @@ class Morser:
     print(f'Initial DIT: {self.dit:.2f}, DAH: {self.dah:.2f}')
 
     self.mark_start = None
-    #self.space_start = None
-    self.was_char = False
-    self.in_char = False
+    self.space_start = None
+    self.was_mark = False
+    self.in_mark = False
 
   def eval_mark(self, elapsed, mark_is_dit: bool):
     if mark_is_dit:
@@ -74,22 +74,33 @@ class Morser:
 
   def eval_dit(self, elapsed):
     print(f'DIT')
-    return self.eval_mark(elapsed, mark_is_dit=True)
 
   def eval_dah(self, elapsed):
     print(f'DAH')
-    return self.eval_mark(elapsed, mark_is_dit=False)
 
   def detect_cadence(self):
-    if self.in_char:
-      if not self.was_char:
+    if self.in_mark:
+      print('•', end='')
+      if not self.was_mark:
         # just entered a character
         self.mark_start = time.monotonic()
-        self.was_char = True
+        elapsed = time.monotonic() - self.space_start
+        print(f'{elapsed:.2f}', end=' ')
+        if elapsed >= self.word_space * 0.7:
+          print('WORD_SPACE')
+        elif elapsed >= self.char_space * 0.7:
+          print('CHAR_SPACE')
+        elif elapsed >= self.intra_char * 1.2:
+          print('INTRA_CHAR')
+        else:
+          print(f'¿SPACE?')
     else:
-      if self.was_char:
+      print('◦', end='')
+      if self.was_mark:
         # just exited a character
-        self.in_char = False
+        self.space_start = time.monotonic()
+        self.in_mark = False
+        self.was_mark = False
         elapsed = time.monotonic() - self.mark_start
         print(f'{elapsed:.2f}', end=' ')
         if elapsed >= self.dah * 0.7:
@@ -99,7 +110,6 @@ class Morser:
           self.eval_dit(elapsed)
         else:
           print(f'NAH')
-        self.was_char = False
     pass
 
 
@@ -117,7 +127,7 @@ class Morser:
 
   def loop(self, button: DigitalInOut, buzzer: PWMOut, led: DigitalInOut):
     button_is_pulled_up = button.value
-    self.in_char = not button_is_pulled_up
+    self.in_mark = not button_is_pulled_up
     if not button_is_pulled_up:
       # buzzer.duty_cycle = 16384  # 25% duty cycle
       # buzzer.duty_cycle = 32768  # 50% duty cycle

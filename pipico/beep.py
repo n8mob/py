@@ -5,28 +5,79 @@ import pwmio
 from digitalio import DigitalInOut
 from pwmio import PWMOut
 
+DAH = 'DAH'
+
+DIT = 'DIT'
+
+MORSE = {
+  (DIT,): 'E',
+  (DAH,): 'T',
+  (DIT, DIT): 'I',
+  (DIT, DAH): 'A',
+  (DAH, DIT): 'N',
+  (DAH, DAH): 'M',
+  (DIT, DIT, DIT): 'S',
+  (DIT, DIT, DAH): 'U',
+  (DIT, DAH, DIT): 'R',
+  (DIT, DAH, DAH): 'W',
+  (DAH, DIT, DIT): 'D',
+  (DAH, DIT, DAH): 'K',
+  (DAH, DAH, DIT): 'G',
+  (DAH, DAH, DAH): 'O',
+  (DIT, DIT, DIT, DIT): 'H',
+  (DIT, DIT, DIT, DAH): 'V',
+  (DIT, DIT, DAH, DIT): 'F',
+  (DIT, DAH, DIT, DIT): 'L',
+  (DIT, DAH, DAH, DIT): 'P',
+  (DIT, DAH, DAH, DAH): 'J',
+  (DAH, DIT, DIT, DIT): 'B',
+  (DAH, DIT, DIT, DAH): 'X',
+  (DAH, DIT, DAH, DIT): 'C',
+  (DAH, DAH, DIT, DIT): 'Z',
+  (DAH, DAH, DIT, DAH): 'Q',
+  (DAH, DAH, DAH, DAH, DAH): '0',
+  (DIT, DAH, DAH, DAH, DAH): '1',
+  (DIT, DIT, DAH, DAH, DAH): '2',
+  (DIT, DIT, DIT, DAH, DAH): '3',
+  (DIT, DIT, DIT, DIT, DAH): '4',
+  (DIT, DIT, DIT, DIT, DIT): '5',
+  (DAH, DIT, DIT, DIT, DIT): '6',
+  (DAH, DAH, DIT, DIT, DIT): '7',
+  (DAH, DAH, DAH, DIT, DIT): '8',
+  (DAH, DAH, DAH, DAH, DIT): '9',
+  (DAH, DIT, DIT, DIT, DAH): '--',
+  (DIT, DAH, DIT, DAH, DIT, DAH): '.',
+  (DIT, DIT, DAH, DAH, DIT, DIT): ',',
+  (DIT, DIT, DAH, DAH, DIT, DIT): '?',
+}
+
 
 class Morser:
+
   def __init__(
     self,
     dit=0.2,
     dah_multiple=2.5,
     intra_char=1.5,
     char_space=3.0,
-    word_space=6.5,
+    word_space=12.0,
     recent_buffer_size=8,
     dit_threshold=0.05,
     dah_threshold=0.1
     ):
+    self.led = digitalio.DigitalInOut(board.GP25)
+    self.led.direction = digitalio.Direction.OUTPUT
     self.dit = dit
     self.dah_multiple = dah_multiple
     self.dah = self.dit * self.dah_multiple
-    self.intra_char = intra_char
-    self.char_space = char_space
-    self.word_space = word_space
+    self.intra_char = self.dit * intra_char
+    self.char_space = self.dit * char_space
+    self.word_space = self.dit * word_space
     self.recent_dits = []
     self.recent_dahs = []
     self.recent_buffer_size = recent_buffer_size
+    self.char_buffer = []
+    self.word_buffer = []
     self.dit_threshold = dit_threshold
     self.dah_threshold = dah_threshold
 
@@ -40,12 +91,12 @@ class Morser:
   def eval_mark(self, elapsed, mark_is_dit: bool):
     if mark_is_dit:
       mark = self.dit
-      mark_word = 'DIT'
+      mark_word = DIT
       recent_marks = self.recent_dits
       threshold = self.dit_threshold
     else:
       mark = self.dah
-      mark_word = 'DAH'
+      mark_word = DAH
       recent_marks = self.recent_dahs
       threshold = self.dah_threshold
 
@@ -62,7 +113,7 @@ class Morser:
 
       mark_factor = len(recent_marks) // 2
       recent_marks = recent_marks[mark_factor:]
-      print(f'Trimming {mark_factor} from recent {mark_word}s: {recent_marks}')
+      print(f'Trim {mark_word}s')
 
     if mark_is_dit:
       self.dit = mark
@@ -74,68 +125,86 @@ class Morser:
 
   def eval_dit(self, elapsed):
     print(f'DIT')
+    self.char_buffer.append(DIT)
+    self.eval_mark(elapsed, mark_is_dit=True)
 
   def eval_dah(self, elapsed):
     print(f'DAH')
+    self.char_buffer.append(DAH)
+    self.eval_mark(elapsed, mark_is_dit=False)
 
   def detect_cadence(self):
     if self.in_mark:
-      print('•', end='')
+      self.led.value = True
       if not self.was_mark:
         # just entered a character
         self.mark_start = time.monotonic()
-        elapsed = time.monotonic() - self.space_start
-        print(f'{elapsed:.2f}', end=' ')
-        if elapsed >= self.word_space * 0.7:
-          print('WORD_SPACE')
-        elif elapsed >= self.char_space * 0.7:
-          print('CHAR_SPACE')
-        elif elapsed >= self.intra_char * 1.2:
-          print('INTRA_CHAR')
-        else:
-          print(f'¿SPACE?')
+        if self.space_start:
+          space_elapsed = time.monotonic() - self.space_start
+          self.eval_space(space_elapsed)
+      self.was_mark = True
     else:
-      print('◦', end='')
+      self.led.value = False
       if self.was_mark:
         # just exited a character
-        self.space_start = time.monotonic()
-        self.in_mark = False
         self.was_mark = False
-        elapsed = time.monotonic() - self.mark_start
-        print(f'{elapsed:.2f}', end=' ')
-        if elapsed >= self.dah * 0.7:
-          self.eval_dah(elapsed)
-        elif elapsed <= self.dit * 1.2:
-          # was a dit
-          self.eval_dit(elapsed)
-        else:
-          print(f'NAH')
+        self.space_start = time.monotonic()
+        if self.mark_start:
+          mark_elapsed = time.monotonic() - self.mark_start
+          if mark_elapsed >= self.dah * 0.7:
+            self.eval_dah(mark_elapsed)
+          elif mark_elapsed <= self.dit * 1.2:
+            # was a dit
+            self.eval_dit(mark_elapsed)
+          else:
+            print(f'NAH')
+      self.was_mark = False
+      if self.space_start:
+        space_elapsed = time.monotonic() - self.space_start
+        if space_elapsed >= self.word_space * 2:
+          self.eval_space(space_elapsed)
     pass
 
+  def eval_space(self, space_elapsed):
+    if space_elapsed >= self.word_space * 0.7:
+      print('WORD_SPACE')
+      self.eval_word()
+    elif space_elapsed >= self.char_space * 0.7:
+      print('CHAR_SPACE')
+      self.eval_char()
+    elif space_elapsed >= self.intra_char * 1.2:
+      print('INTRA_CHAR')
+
+  def eval_word(self):
+    self.eval_char()
+    print(f'WORD: {"".join(self.word_buffer)}')
+    self.word_buffer.clear()
+    self.char_buffer.clear()
+
+  def eval_char(self):
+    char = MORSE[tuple(self.char_buffer)] if tuple(self.char_buffer) in MORSE else '?'
+    print(f'CHAR: {char}')
+    self.char_buffer.clear()
+    self.word_buffer.append(char)
 
   def blink_and_beep(self):
-    led = digitalio.DigitalInOut(board.GP25)
-    led.direction = digitalio.Direction.OUTPUT
-
     button = digitalio.DigitalInOut(board.GP15)
     button.switch_to_input(pull=digitalio.Pull.UP)
 
     buzzer = pwmio.PWMOut(board.GP11, duty_cycle=0, frequency=710)
 
     while True:
-      self.loop(button, buzzer, led)
+      self.loop(button, buzzer)
 
-  def loop(self, button: DigitalInOut, buzzer: PWMOut, led: DigitalInOut):
+  def loop(self, button: DigitalInOut, buzzer: PWMOut):
     button_is_pulled_up = button.value
     self.in_mark = not button_is_pulled_up
     if not button_is_pulled_up:
       # buzzer.duty_cycle = 16384  # 25% duty cycle
-      # buzzer.duty_cycle = 32768  # 50% duty cycle
-      buzzer.duty_cycle = 49152  # 75% duty cycle
-      led.value = True
+      buzzer.duty_cycle = 32768  # 50% duty cycle
+      # buzzer.duty_cycle = 49152  # 75% duty cycle
     else:
       buzzer.duty_cycle = 0
-      led.value = False
     self.detect_cadence()
     time.sleep(0.01)
 

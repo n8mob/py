@@ -144,6 +144,7 @@ class Morser:
           self.eval_space(space_elapsed)
       self.was_mark = True
     else:
+      # dots in SPAAAAAAACE!!!
       self.led.value = False
       if self.was_mark:
         # just exited a character
@@ -158,12 +159,16 @@ class Morser:
             self.eval_dit(mark_elapsed)
           else:
             print(f'NAH')
-      self.was_mark = False
-      if self.space_start:
-        space_elapsed = time.monotonic() - self.space_start
-        if space_elapsed >= self.word_space * 2:
-          self.eval_space(space_elapsed)
-    pass
+        self.was_mark = False
+      else:
+        # still in space
+        # if timeout, evaluate space
+        if self.space_start:
+          space_elapsed = time.monotonic() - self.space_start
+          if space_elapsed >= self.word_space * 2:
+            self.eval_space(space_elapsed)
+            self.space_start = None
+
 
   def eval_space(self, space_elapsed):
     if space_elapsed >= self.word_space * 0.7:

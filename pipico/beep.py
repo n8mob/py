@@ -113,7 +113,6 @@ class Morser:
 
       mark_factor = len(recent_marks) // 2
       recent_marks = recent_marks[mark_factor:]
-      print(f'Trim {mark_word}s')
 
     if mark_is_dit:
       self.dit = mark
@@ -124,12 +123,10 @@ class Morser:
     return recent_marks
 
   def eval_dit(self, elapsed):
-    print(f'DIT')
     self.char_buffer.append(DIT)
     self.eval_mark(elapsed, mark_is_dit=True)
 
   def eval_dah(self, elapsed):
-    print(f'DAH')
     self.char_buffer.append(DAH)
     self.eval_mark(elapsed, mark_is_dit=False)
 
@@ -172,23 +169,19 @@ class Morser:
 
   def eval_space(self, space_elapsed):
     if space_elapsed >= self.word_space * 0.7:
-      print('WORD_SPACE')
       self.eval_word()
     elif space_elapsed >= self.char_space * 0.7:
-      print('CHAR_SPACE')
       self.eval_char()
-    elif space_elapsed >= self.intra_char * 1.2:
-      print('INTRA_CHAR')
 
   def eval_word(self):
     self.eval_char()
-    print(f'WORD: {"".join(self.word_buffer)}')
+    print()
     self.word_buffer.clear()
     self.char_buffer.clear()
 
   def eval_char(self):
     char = MORSE[tuple(self.char_buffer)] if tuple(self.char_buffer) in MORSE else '?'
-    print(f'CHAR: {char}')
+    print(char, end='')
     self.char_buffer.clear()
     self.word_buffer.append(char)
 

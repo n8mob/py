@@ -9,12 +9,12 @@ from pwmio import PWMOut
 class Morser:
   def __init__(
     self,
-    dit=0.1,
-    dah_multiple=2.5,
+    dit=0.2,
+    dah_multiple=3,
     intra_char=1.5,
     char_space=3.0,
     word_space=6.5,
-    recent_buffer_size=5,
+    recent_buffer_size=8,
     dit_threshold=0.05,
     dah_threshold=0.1
     ):
@@ -30,6 +30,8 @@ class Morser:
     self.dit_threshold = dit_threshold
     self.dah_threshold = dah_threshold
 
+    print(f'Initial DIT: {self.dit:.2f}, DAH: {self.dah:.2f}')
+
     self.mark_start = None
     #self.space_start = None
     self.was_char = False
@@ -38,35 +40,44 @@ class Morser:
   def eval_mark(self, elapsed, mark_is_dit: bool):
     if mark_is_dit:
       mark = self.dit
+      mark_word = 'DIT'
       recent_marks = self.recent_dits
       threshold = self.dit_threshold
     else:
       mark = self.dah
+      mark_word = 'DAH'
       recent_marks = self.recent_dahs
       threshold = self.dah_threshold
 
+      recent_marks.append(elapsed)
     if len(recent_marks) == 0:
       return mark
 
-    recent_marks.append(elapsed)
+    print(f'Recent {mark_word}s: {recent_marks}')
     if len(recent_marks) > self.recent_buffer_size:
-      recent_marks.pop(0)
+      mark_factor = len(recent_marks) // 2
+      before = len(recent_marks)
+      recent_marks = recent_marks[:mark_factor]
+      print(f'Trimming recent {mark_word}s from {before} to {len(recent_marks)}')
     mean_mark = sum(recent_marks) / len(recent_marks)
-    if mean_mark > 0 and mean_mark - mark > threshold:
+    if mean_mark > 0 and abs(mean_mark - mark) < threshold:
+      print(f'Adjusting {mark_word} from {mark:.2f} to {mean_mark:.2f}')
       mark = mean_mark
 
     if mark_is_dit:
       self.dit = mark
+      self.recent_dits = recent_marks
     else:
       self.dah = mark
-    return mark
+      self.recent_dahs = recent_marks
+    return recent_marks
 
   def eval_dit(self, elapsed):
-    print(f'DIT: {elapsed:.2f}')
+    print(f'DIT')
     return self.eval_mark(elapsed, mark_is_dit=True)
 
   def eval_dah(self, elapsed):
-    print(f'DAH: {elapsed:.2f}')
+    print(f'DAH')
     return self.eval_mark(elapsed, mark_is_dit=False)
 
   def detect_cadence(self):
@@ -80,10 +91,14 @@ class Morser:
         # just exited a character
         self.in_char = False
         elapsed = time.monotonic() - self.mark_start
-        if elapsed < (self.dit + self.dit * self.intra_char) / 2:
+        print(f'{elapsed:.2f}', end=' ')
+        if elapsed >= self.dah * 0.7:
+          self.eval_dah(elapsed)
+        elif elapsed <= self.dit * 1.2:
+          # was a dit
           self.eval_dit(elapsed)
         else:
-          self.eval_dah(elapsed)
+          print(f'NAH')
         self.was_char = False
     pass
 
@@ -116,5 +131,5 @@ class Morser:
 
 
 if __name__ == '__main__':
-  m = Morser()
+  m = Morser(dit=0.25)
   m.blink_and_beep()

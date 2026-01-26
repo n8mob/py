@@ -59,7 +59,6 @@ MORSE = {
   (DIT, DAH, DAH, DAH, DAH, DIT): "'",
   (DIT, DAH, DIT, DIT, DAH, DIT): '"',
   (DAH, DIT, DIT, DIT, DIT, DAH): '-',
-  (DIT, DAH, DAH, DIT, DAH, DIT): '&',
   (DIT, DIT, DAH, DIT, DIT, DIT, DAH): '$',
 }
 

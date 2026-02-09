@@ -2,6 +2,7 @@ import time
 import board
 import digitalio
 import pwmio
+import supervisor
 from digitalio import DigitalInOut
 from pwmio import PWMOut
 
@@ -74,7 +75,8 @@ class Morser:
     word_space=15.0,
     recent_buffer_size=8,
     dit_threshold=0.05,
-    dah_threshold=0.1
+    dah_threshold=0.1,
+    callback=lambda self: None
     ):
     self.led = digitalio.DigitalInOut(board.GP25)
     self.led.direction = digitalio.Direction.OUTPUT
@@ -87,10 +89,12 @@ class Morser:
     self.recent_dits = []
     self.recent_dahs = []
     self.recent_buffer_size = recent_buffer_size
+    self.mark_buffer = []
     self.char_buffer = []
     self.word_buffer = []
     self.dit_threshold = dit_threshold
     self.dah_threshold = dah_threshold
+    self._callback = callback
 
     print(f'Initial DIT: {self.dit:.2f}, DAH: {self.dah:.2f}')
 
@@ -134,11 +138,11 @@ class Morser:
     return recent_marks
 
   def eval_dit(self, elapsed):
-    self.char_buffer.append(DIT)
+    self.mark_buffer.append(DIT)
     self.eval_mark(elapsed, mark_is_dit=True)
 
   def eval_dah(self, elapsed):
-    self.char_buffer.append(DAH)
+    self.mark_buffer.append(DAH)
     self.eval_mark(elapsed, mark_is_dit=False)
 
   def detect_cadence(self):
@@ -160,13 +164,11 @@ class Morser:
         self.space_start = time.monotonic()
         if self.mark_start:
           mark_elapsed = time.monotonic() - self.mark_start
-          if mark_elapsed >= self.dah * 0.7:
-            self.eval_dah(mark_elapsed)
-          elif mark_elapsed <= self.dit * 1.2:
+          if mark_elapsed <= self.dit * 1.2:
             # was a dit
             self.eval_dit(mark_elapsed)
-          else:
-            print(f'NAH')
+          elif mark_elapsed >= self.dah * 0.7:
+            self.eval_dah(mark_elapsed)
         self.was_mark = False
       else:
         # still in space
@@ -186,15 +188,14 @@ class Morser:
 
   def eval_word(self):
     self.eval_char()
-    print()
+    self.callback()
     self.word_buffer.clear()
-    self.char_buffer.clear()
 
   def eval_char(self):
     char = MORSE[tuple(self.char_buffer)] if tuple(self.char_buffer) in MORSE else '?'
-    print(char, end='')
-    self.char_buffer.clear()
     self.word_buffer.append(char)
+    self.char_buffer.clear()
+    self.mark_buffer.clear()
 
   def blink_and_beep(self):
     button = digitalio.DigitalInOut(board.GP15)
@@ -215,7 +216,21 @@ class Morser:
     else:
       buzzer.duty_cycle = 0
     self.detect_cadence()
+
+    # Escape hatch: if one or more bytes arrive on the USB serial console,
+    # consume one byte and soft-reload the program.
+    if supervisor.runtime.serial_bytes_available:
+      # consume a byte to clear the buffer (over time, one byte per loop)
+      _ = supervisor.runtime.read_serial(1)
+      supervisor.reload()
+
     time.sleep(0.01)
+
+  def callback(self):
+    if self._callback:
+      self._callback(self)
+    else:
+      print('no callback defined')
 
 
 if __name__ == '__main__':

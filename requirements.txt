@@ -23,3 +23,6 @@ traitlets~=5.14.2
 typing_extensions~=4.10.0
 urllib3~=2.5.0
 wcwidth~=0.2.13
+xxhash~=3.7.1
+beautifulsoup4~=4.15.0
+ipykernel~=7.3.0

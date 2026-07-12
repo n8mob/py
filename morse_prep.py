@@ -44,7 +44,11 @@ def preprocess_text(text):
   return processed_text
 
 
-# Example usage
-sample_text = "Feynman was born on May 11, 1918, in New York City,[2] to Lucille (née Phillips; 1895–1981), a homemaker, and Melville Arthur Feynman (1890–1946), a sales manager.[3] Feynman's father was born into a Jewish family in Minsk, Russian Empire,[4] and immigrated with his parents to the United States at the age of five."
-cleaned_text = preprocess_text(sample_text)
-print(cleaned_text)
+def example_usage():
+  sample_text = "Feynman was born on May 11, 1918, in New York City,[2] to Lucille (née Phillips; 1895–1981), a homemaker, and Melville Arthur Feynman (1890–1946), a sales manager.[3] Feynman's father was born into a Jewish family in Minsk, Russian Empire,[4] and immigrated with his parents to the United States at the age of five."
+  cleaned_text = preprocess_text(sample_text)
+  print(cleaned_text)
+
+if __name__ == "__main__":
+  example_usage()
+

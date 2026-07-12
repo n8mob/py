@@ -33,7 +33,7 @@ class TestNGrammer(unittest.TestCase):
     actual = self.uut.count(text)
     self.assertEqual(expected, actual)
 
-  def test_2gram_of_abcabc_is_221(self):
+  def test_2gram_of_abcabc_is_ab2_bc2_ca1(self):
     text = "abcabc"
     expected = {('a', 'b'): 2, ('b', 'c'): 2, ('c', 'a'): 1}
     actual = self.uut.count(text)

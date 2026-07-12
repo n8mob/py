@@ -1,0 +1,5 @@
+this is just a simple text file
+today I am using it to test the 'longest repeated substring' algorithm that ChatGPT showed me.
+
+let us repeat a fairly long string of text. twice
+let us repeat a fairly long string of text.

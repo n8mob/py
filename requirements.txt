@@ -26,3 +26,4 @@ wcwidth~=0.2.13
 xxhash~=3.7.1
 beautifulsoup4~=4.15.0
 ipykernel~=7.3.0
+click~=8.5.0

@@ -30,10 +30,14 @@ import struct
 import subprocess
 import sys
 import tempfile
+import time
+import urllib.request
+import urllib.parse
 import wave
+import xml.etree.ElementTree as ET
 
 __all__ = ["MORSE_CODE", "encode", "decode", "generate", "to_wav_bytes",
-           "save_wav", "play"]
+           "save_wav", "play", "play_feed"]
 
 MORSE_CODE = {
     "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".", "F": "..-.",
@@ -49,6 +53,8 @@ MORSE_CODE = {
     '"': ".-..-.", "$": "...-..-", "@": ".--.-.",
 }
 _REVERSE = {code: char for char, code in MORSE_CODE.items()}
+
+DEFAULT_WPM = 15
 
 SAMPLE_RATE = 44100
 
@@ -112,7 +118,7 @@ def _timeline(code: str, wpm: float, farnsworth_wpm: float | None):
                     raise ValueError(f"Invalid Morse symbol {sym!r}")
 
 
-def generate(text: str, *, wpm: float = 20, freq: float = 600,
+def generate(text: str, *, wpm: float = DEFAULT_WPM, freq: float = 600,
              volume: float = 0.5, farnsworth_wpm: float | None = None,
              sample_rate: int = SAMPLE_RATE, is_code: bool = False) -> bytes:
     """Return 16-bit mono PCM samples for ``text``.
@@ -201,11 +207,26 @@ def play(text: str, **kwargs) -> None:
         os.remove(path)
 
 
+def play_feed(url: str, wpm: float = DEFAULT_WPM):
+    with urllib.request.urlopen(url) as resp:
+        root = ET.parse(resp).getroot()
+
+    for item in root.iter("item"):
+        title = item.findtext("title")
+        DEBUG = True
+        if DEBUG:
+            print(title)
+        play(title, wpm=wpm)
+        time.sleep(0.4)
+        play("=", wpm=wpm)
+        time.sleep(0.8)
+
+
 def _main(argv=None) -> None:
     import argparse
     p = argparse.ArgumentParser(description="Play text as Morse code.")
     p.add_argument("text", help="text to send (or Morse with --code)")
-    p.add_argument("--wpm", type=float, default=20, help="speed in words per minute (default 20)")
+    p.add_argument("--wpm", type=float, default=DEFAULT_WPM, help=f"speed in words per minute (default {DEFAULT_WPM})")
     p.add_argument("--farnsworth", type=float, metavar="WPM", help="effective speed for spacing")
     p.add_argument("--freq", type=float, default=600, help="tone frequency in Hz (default 600)")
     p.add_argument("--volume", type=float, default=0.5, help="0.0 to 1.0 (default 0.5)")
@@ -215,6 +236,13 @@ def _main(argv=None) -> None:
 
     opts = dict(wpm=a.wpm, freq=a.freq, volume=a.volume,
                 farnsworth_wpm=a.farnsworth, is_code=a.code)
+
+    url = urllib.parse.urlparse(a.text)
+    if url.scheme in ("https", "http") and url.netloc:
+        print(f'Getting feed from: {a.text}')
+        play_feed(a.text, a.wpm)
+        return
+             
     print(a.text if a.code else encode(a.text))
     if a.out:
         save_wav(a.text, a.out, **opts)

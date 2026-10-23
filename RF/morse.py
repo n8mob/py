@@ -175,15 +175,28 @@ def save_wav(text: str, path: str, **kwargs) -> str:
 
 
 def _play_wav_file(path: str) -> None:
+    try:
+        import sound # pythonista
+    except ImportError:
+        sound = None
+    if sound is not None:
+        player = sound.Player(path)
+        player.play()
+        time.sleep(player.duration + 0.1) # prevent premature close of player
+        return
+
     if sys.platform == "win32":
         import winsound
         winsound.PlaySound(path, winsound.SND_FILENAME)
         return
+
     if sys.platform == "darwin":
         players = [["afplay"]]
+
     else:
         players = [["paplay"], ["pw-play"], ["aplay", "-q"],
                    ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"]]
+
     for cmd in players:
         if shutil.which(cmd[0]):
             subprocess.run(cmd + [path], check=True)

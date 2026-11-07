@@ -1,0 +1,58 @@
+[project]
+name = "py"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Nate Grigg", email = "workmachine@nategrigg.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "asttokens~=2.4.1",
+    "beautifulsoup4~=4.15.0",
+    "certifi~=2024.7.4",
+    "charset-normalizer~=3.3.2",
+    "click~=8.5.0",
+    "decorator~=5.1.1",
+    "executing~=2.0.1",
+    "idna~=3.6",
+    "ipykernel>=7.3.0",
+    "ipython~=8.23.0",
+    "jedi~=0.19.1",
+    "matplotlib-inline~=0.1.6",
+    "parso~=0.8.3",
+    "pexpect~=4.9.0",
+    "prompt-toolkit~=3.0.43",
+    "ptyprocess~=0.7.0",
+    "pure-eval~=0.2.2",
+    "pygments~=2.17.2",
+    "requests~=2.32.4",
+    "six~=1.16.0",
+    "stack-data~=0.6.3",
+    "traitlets~=5.14.2",
+    "typing-extensions>=4.10.0",
+    "urllib3~=2.5.0",
+    "wcwidth~=0.2.13",
+    "xxhash~=3.7.1",
+]
+
+[project.scripts]
+py = "py:main"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[project.optional-dependencies]
+adafruit = [
+    "pyftdi~=0.55.0",
+    "pyserial~=3.5",
+    "pyusb~=1.2.1",
+    "Adafruit-Blinka~=8.38.0",
+    "adafruit-circuitpython-busdevice~=5.2.6",
+    "adafruit-circuitpython-connectionmanager~=1.0.1",
+    "adafruit-circuitpython-requests~=3.2.3",
+    "adafruit-circuitpython-typing~=1.10.3",
+    "Adafruit-PlatformDetect~=3.62.0",
+    "Adafruit-PureIO~=1.1.11",
+]
